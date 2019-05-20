@@ -1,0 +1,14 @@
+FROM balenalib/raspberry-pi:stretch-build as builder
+
+ENV QEMU_EXECVE 1
+
+RUN [ "cross-build-start" ]
+
+# install hyperion compile deps
+# additional zlib1g-dev and libraspberrypi-dev
+RUN apt-get update && apt-get install -y git cmake python3-dev qtbase5-dev libqt5serialport5-dev build-essential libusb-1.0-0-dev libavahi-core-dev libavahi-compat-libdnssd-dev zlib1g-dev libraspberrypi-dev
+
+RUN [ "cross-build-end" ]
+
+# we use always qemu
+ENTRYPOINT ["/usr/bin/qemu-arm-static"]
