@@ -1,0 +1,36 @@
+trigger:
+- master
+
+jobs:
+- job: Linux
+  pool:
+    vmImage: 'ubuntu-latest'
+  strategy:
+    matrix:
+      AMD64 (x64):
+        dockerFile: 'amd64.stretch'
+        dockerImage: 'Debian Stretch (AMD64)'
+        dockerTags: 'amd64'
+      i386 (x86):
+        dockerFile: 'i386.stretch'
+        dockerImage: 'Debian Stretch (i386)'
+        dockerTags: 'i386'
+      ARMv6hf (Raspberry Pi v1 & ZERO):
+        dockerFile: 'armv6hf.stretch'
+        dockerImage: 'Debian Stretch (Raspberry Pi v1 & ZERO)'
+        dockerTags: 'armv6hf'
+      ARMv7hf (Raspberry Pi 2 & 3):
+        dockerFile: 'armv7hf.stretch'
+        dockerImage: 'Debian Stretch (Raspberry Pi 2 & 3)'
+        dockerTags: 'armv7hf'
+      ARMv8 (Generic AARCH64):
+        dockerFile: 'aarch64.stretch'
+        dockerImage: 'ARMv8 (Generic AARCH64)'
+        dockerTags: 'aarch64'
+  steps:
+  - task: Docker@2
+    displayName: 'Build $(dockerImage)'
+    inputs:
+      containerRegistry: 'Docker Hub'
+      Dockerfile: $(dockerFile)
+      tags: $(dockerTags)
