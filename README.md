@@ -1,4 +1,4 @@
-# Docker Hyperion compilation <br>[![Build Status](https://dev.azure.com/Hyperion-Project/Hyperion.NG/_apis/build/status/Docker%20Images?branchName=master)](https://dev.azure.com/Hyperion-Project/Hyperion.NG/_build/latest?definitionId=5&branchName=master)<br>
+# Docker Hyperion compilation <br>[![Build Status](https://dev.azure.com/Hyperion-Project/Hyperion.NG/_apis/build/status/Hyperion.NG.Docker-CI?branchName=master)](https://dev.azure.com/Hyperion-Project/Hyperion.NG/_build/latest?definitionId=6&branchName=master)<br>
 Provides images to compile Hyperion inside a Docker container.
 Images are available at https://hub.docker.com/r/hyperionproject/hyperion-ci/
 
