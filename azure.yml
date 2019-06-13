@@ -37,7 +37,7 @@ jobs:
     displayName: 'Build $(dockerImage)'
     inputs:
       command: buildAndPush
-      repository: hyperion-ci
+      repository: 'hyperionproject/hyperion-ci'
       containerRegistry: 'Docker Hub'
       Dockerfile: $(dockerFile)
       tags: $(dockerTags)
