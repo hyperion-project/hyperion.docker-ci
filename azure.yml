@@ -29,8 +29,20 @@ jobs:
         dockerTags: 'aarch64'
   steps:
   - task: Docker@2
-    displayName: 'Build $(dockerImage)'
+    displayName: Login to Docker Hub
     inputs:
+      command: login
+      containerRegistry: 'Docker Hub'
+  - task: Docker@2
+    displayName: 'Build $(dockerImage) and Push to Docker Hub'
+    inputs:
+      command: buildAndPush
+      repository: 'hyperionproject/hyperion-ci'
       containerRegistry: 'Docker Hub'
       Dockerfile: $(dockerFile)
       tags: $(dockerTags)
+  - task: Docker@2
+    displayName: Logout of Docker Hub
+    inputs:
+      command: logout
+      containerRegistry: 'Docker Hub'
