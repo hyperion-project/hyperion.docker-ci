@@ -14,5 +14,6 @@ RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selectio
 	libavahi-compat-libdnssd-dev \
 	libjpeg-dev \
 	libmbedtls-dev \
+	libqt5sql5-sqlite \
 	zlib1g-dev \
 	libraspberrypi-dev
