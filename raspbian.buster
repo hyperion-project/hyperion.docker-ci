@@ -16,4 +16,5 @@ RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selectio
 	libmbedtls-dev \
 	libqt5sql5-sqlite \
 	zlib1g-dev \
+	libssl1.0-dev \
 	libraspberrypi-dev
