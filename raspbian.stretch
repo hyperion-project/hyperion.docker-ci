@@ -10,6 +10,7 @@ RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selectio
 	libqt5serialport5-dev \
 	build-essential \
 	libusb-1.0-0-dev \
+	libcec-dev \
 	libavahi-core-dev \
 	libavahi-compat-libdnssd-dev \
 	libjpeg-dev \
