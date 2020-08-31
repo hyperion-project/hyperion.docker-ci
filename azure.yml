@@ -7,34 +7,38 @@ jobs:
     vmImage: 'ubuntu-latest'
   strategy:
     matrix:
-      AMD64 (x64):
+      X86_64-stretch:
         dockerFile: 'amd64.stretch'
-        dockerImage: 'Debian Stretch (AMD64)'
+        dockerImage: 'Debian Stretch (X64_86)'
         dockerTags: 'amd64'
-      i386 (x86):
-        dockerFile: 'i386.stretch'
-        dockerImage: 'Debian Stretch (i386)'
-        dockerTags: 'i386'
+      X86_64-buster:
+        dockerFile: 'amd64.buster'
+        dockerImage: 'Debian Buster (X64_86)'
+        dockerTags: 'amd64-buster'
       ARMv6hf-stretch (Raspberry Pi v1 & ZERO):
         dockerFile: 'armv6hf.stretch'
         dockerImage: 'Debian Stretch (Raspberry Pi v1 & ZERO)'
         dockerTags: 'armv6hf'
-      ARMv7hf-stretch (Raspberry Pi 2 & 3):
-        dockerFile: 'armv7hf.stretch'
-        dockerImage: 'Debian Stretch (Raspberry Pi 2 & 3)'
-        dockerTags: 'armv7hf'
       ARMv6hf-buster (Raspberry Pi v1 & ZERO):
         dockerFile: 'armv6hf.buster'
         dockerImage: 'Debian Buster (Raspberry Pi v1 & ZERO)'
         dockerTags: 'armv6hf-buster'
+      ARMv7hf-stretch (Raspberry Pi 2 & 3):
+        dockerFile: 'armv7hf.stretch'
+        dockerImage: 'Debian Stretch (Raspberry Pi 2 & 3)'
+        dockerTags: 'armv7hf'
       ARMv7hf-buster (Raspberry Pi 2 & 3):
         dockerFile: 'armv7hf.buster'
         dockerImage: 'Debian Buster (Raspberry Pi 2 & 3)'
         dockerTags: 'armv7hf-buster'
-      ARMv8 (Generic AARCH64):
+      ARMv8-stretch:
         dockerFile: 'aarch64.stretch'
-        dockerImage: 'ARMv8 (Generic AARCH64)'
+        dockerImage: 'Debian Stretch (Generic AARCH64)'
         dockerTags: 'aarch64'
+      ARMv8-buster:
+        dockerFile: 'aarch64.buster'
+        dockerImage: 'Debian Buster (Generic AARCH64)'
+        dockerTags: 'aarch64-buster'
   steps:
   - task: Docker@2
     displayName: Login to Docker Hub
