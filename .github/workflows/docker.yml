@@ -6,34 +6,69 @@ on:
 
 jobs:
   Linux:
-    name: ${{ matrix.dockerImage }}
+    name: ${{ matrix.dockerStage }}
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        dockerTag: [ x86_64, armv6l, armv7l, aarch64, rpi-raspbian-stretch, rpi-raspbian-buster ]
+        dockerImage: [ x86_64, armv6l, armv7l, aarch64, rpi-raspbian ]
         include:
-          - dockerTag: x86_64
-            dockerImage: Debian Stretch (x86_64)
+          - dockerImage: x86_64
+            dockerTag: stretch
+            dockerStage: Debian Stretch (x86_64)
             dockerFile: x86_64.stretch
             os: ubuntu-latest
-          - dockerTag: armv6l
-            dockerImage: Debian Stretch (Raspberry Pi v1 & ZERO)
+
+          - dockerImage: x86_64
+            dockerTag: buster
+            dockerStage: Debian Buster (x86_64)
+            dockerFile: x86_64.buster
+            os: ubuntu-latest
+
+          - dockerImage: armv6l
+            dockerTag: stretch
+            dockerStage: Debian Stretch (Raspberry Pi v1 & ZERO)
             dockerFile: armv6l.stretch
             os: ubuntu-latest
-          - dockerTag: armv7l
-            dockerImage: Debian Stretch (Raspberry Pi 2 & 3)
+
+          - dockerImage: armv6l
+            dockerTag: buster
+            dockerStage: Debian Buster (Raspberry Pi v1 & ZERO)
+            dockerFile: armv6l.buster
+            os: ubuntu-latest
+
+          - dockerImage: armv7l
+            dockerTag: stretch
+            dockerStage: Debian Stretch (Raspberry Pi 2 & 3)
             dockerFile: armv7l.stretch
             os: ubuntu-latest
-          - dockerTag: aarch64
-            dockerImage: Debian Stretch (Generic AARCH64)
+
+          - dockerImage: armv7l
+            dockerTag: buster
+            dockerStage: Debian Buster (Raspberry Pi 2 & 3)
+            dockerFile: armv7l.buster
+            os: ubuntu-latest
+
+          - dockerImage: aarch64
+            dockerTag: stretch
+            dockerStage: Debian Stretch (Generic AARCH64)
             dockerFile: aarch64.stretch
             os: ubuntu-latest
-          - dockerTag: rpi-raspbian-stretch
-            dockerImage: Raspbian Stretch
+
+          - dockerImage: aarch64
+            dockerTag: buster
+            dockerStage: Debian Stretch (Generic AARCH64)
+            dockerFile: aarch64.buster
+            os: ubuntu-latest
+
+          - dockerImage: rpi-raspbian
+            dockerTag: stretch
+            dockerStage: Raspbian Stretch
             dockerFile: raspbian.stretch
             os: RPi3
-          - dockerTag: rpi-raspbian-buster
-            dockerImage: Raspbian Buster
+
+          - dockerImage: rpi-raspbian
+            dockerTag: buster
+            dockerStage: Raspbian Buster
             dockerFile: raspbian.buster
             os: RPi3
 
@@ -43,9 +78,9 @@ jobs:
 
       - name: Build and tag docker image
         run: |
-          docker build -t ghcr.io/hyperion-project/${{ matrix.dockerTag }}:latest -f ${{ matrix.dockerFile }} .
+          docker build -t ghcr.io/hyperion-project/{{ matrix.dockerImage }}:${{ matrix.dockerTag }} -f ${{ matrix.dockerFile }} .
 
-      - name: Publish to GitHub Container/Package Registry
+      - name: Publish to GitHub Container Registry
         run: |
           echo ${{ secrets.DOCKER_CI }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-          docker push ghcr.io/hyperion-project/${{ matrix.dockerTag }}:latest
+          docker push ghcr.io/hyperion-project/{{ matrix.dockerImage }}:${{ matrix.dockerTag }}

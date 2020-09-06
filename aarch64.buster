@@ -1,0 +1,28 @@
+FROM balenalib/aarch64-debian:buster-build
+
+ENV QEMU_EXECVE 1
+
+RUN [ "cross-build-start" ]
+
+# install hyperion compile deps
+RUN apt-get update \
+	&& apt-get install -y \
+	git \
+	cmake \
+	python3-dev \
+	qtbase5-dev \
+	libqt5serialport5-dev \
+	libqt5sql5-sqlite \
+	libqt5svg5-dev \
+	build-essential \
+	libusb-1.0-0-dev \
+	libavahi-core-dev \
+	libavahi-compat-libdnssd-dev \
+	zlib1g-dev \
+	libssl-dev \
+	libcec-dev
+
+RUN [ "cross-build-end" ]
+
+# we use always qemu
+ENTRYPOINT ["/usr/bin/qemu-aarch64-static"]
