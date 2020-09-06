@@ -1,5 +1,12 @@
 FROM balenalib/amd64-debian:stretch-build
 
+LABEL maintainer="Hyperion Project <admin@hyperion-project.org>" \
+	org.opencontainers.image.title="x86_64" \
+	org.opencontainers.image.description="Compile Hyperion for Debian Stretch (x86_64)" \
+	org.opencontainers.image.url="https://github.com/hyperion-project/hyperion.ng" \
+	org.opencontainers.image.source="git@github.com:hyperion-project/hyperion.ng" \
+	org.opencontainers.image.vendor="Hyperion Project"
+
 # install compile deps
 # additional rpm to build rpm packages
 RUN apt-get update && apt-get install -y \

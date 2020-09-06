@@ -1,0 +1,54 @@
+name: Docker CI
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  Linux:
+    name: ${{ matrix.dockerImage }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        dockerTag: [ x86_64, armv6l, armv7l, aarch64, rpi-raspbian-stretch, rpi-raspbian-buster ]
+        include:
+          - dockerTag: x86_64
+            dockerImage: Debian Stretch (x86_64)
+            dockerFile: x86_64.stretch
+            os: ubuntu-latest
+          - dockerTag: armv6l
+            dockerImage: Debian Stretch (Raspberry Pi v1 & ZERO)
+            dockerFile: armv6l.stretch
+            os: ubuntu-latest
+          - dockerTag: armv7l
+            dockerImage: Debian Stretch (Raspberry Pi 2 & 3)
+            dockerFile: armv7l.stretch
+            os: ubuntu-latest
+          - dockerTag: aarch64
+            dockerImage: Debian Stretch (Generic AARCH64)
+            dockerFile: aarch64.stretch
+            os: ubuntu-latest
+          - dockerTag: rpi-raspbian-stretch
+            dockerImage: Raspbian Stretch
+            dockerFile: raspbian.stretch
+            os: RPi3
+          - dockerTag: rpi-raspbian-buster
+            dockerImage: Raspbian Buster
+            dockerFile: raspbian.buster
+            os: RPi3
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+
+      - name: Build and tag docker image
+        run: |
+          docker build -t docker.pkg.github.com/hyperion-project/hyperion.ng/${{ matrix.dockerTag }}:latest -f ${{ matrix.dockerFile }} .
+          docker build -t ghcr.io/hyperion-project/hyperion.ng:${{ matrix.dockerTag }} -f ${{ matrix.dockerFile }} .
+
+      - name: Publish to GitHub Container/Package Registry
+        run: |
+          echo ${{ secrets.DOCKER_CI }} | docker login docker.pkg.github.com -u ${{ github.actor }} --password-stdin
+          docker push docker.pkg.github.com/hyperion-project/hyperion.ng/${{ matrix.dockerTag }}:latest
+          echo ${{ secrets.DOCKER_CI }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+          docker push ghcr.io/hyperion-project/hyperion.ng:${{ matrix.dockerTag }}

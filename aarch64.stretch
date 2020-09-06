@@ -1,5 +1,12 @@
 FROM balenalib/aarch64-debian:stretch-build
 
+LABEL maintainer="Hyperion Project <admin@hyperion-project.org>" \
+	org.opencontainers.image.title="aarch64" \
+	org.opencontainers.image.description="Compile Hyperion for Debian Stretch (Generic AARCH64)" \
+	org.opencontainers.image.url="https://github.com/hyperion-project/hyperion.ng" \
+	org.opencontainers.image.source="git@github.com:hyperion-project/hyperion.ng" \
+	org.opencontainers.image.vendor="Hyperion Project"
+
 ENV QEMU_EXECVE 1
 
 RUN [ "cross-build-start" ]

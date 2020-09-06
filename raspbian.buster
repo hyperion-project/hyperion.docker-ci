@@ -1,5 +1,12 @@
 FROM balenalib/rpi-raspbian:buster
 
+LABEL maintainer="Hyperion Project <admin@hyperion-project.org>" \
+	org.opencontainers.image.title="rpi-raspbian-buster" \
+	org.opencontainers.image.description="Compile Hyperion native for Raspbian Buster (Raspberry Pi v1, ZERO, 2 & 3)" \
+	org.opencontainers.image.url="https://github.com/hyperion-project/hyperion.ng" \
+	org.opencontainers.image.source="git@github.com:hyperion-project/hyperion.ng" \
+	org.opencontainers.image.vendor="Hyperion Project"
+
 RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections \
 	&& apt-get update \
 	&& apt-get install -y \

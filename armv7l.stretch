@@ -1,4 +1,11 @@
-FROM balenalib/raspberry-pi2:buster-build as builder
+FROM balenalib/raspberry-pi2:stretch-build as builder
+
+LABEL maintainer="Hyperion Project <admin@hyperion-project.org>" \
+	org.opencontainers.image.title="armv7l" \
+	org.opencontainers.image.description="Compile Hyperion for Debian Stretch (Raspberry Pi 2 & 3)" \
+	org.opencontainers.image.url="https://github.com/hyperion-project/hyperion.ng" \
+	org.opencontainers.image.source="git@github.com:hyperion-project/hyperion.ng" \
+	org.opencontainers.image.vendor="Hyperion Project"
 
 ENV QEMU_EXECVE 1
 
