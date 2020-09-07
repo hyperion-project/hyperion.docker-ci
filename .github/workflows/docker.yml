@@ -1,41 +1,38 @@
 name: Docker CI
+
 on:
   push:
     branches:
       - master
 
 jobs:
-
-############################
-###### Debian Stretch ######
-############################
-
-  Stretch:
-    name: ${{ matrix.dockerStage }}
+  Docker:
+    name: ${{ matrix.dockerOS }} ${{ matrix.dockerTag }} ${{ matrix.description }}
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         dockerImage: [ x86_64, armv6l, armv7l, aarch64, rpi-raspbian ]
+        dockerTag: [ stretch, buster ]
         include:
           - dockerImage: x86_64
-            dockerStage: Debian Stretch (x86_64)
-            dockerFile: x86_64.stretch
+            dockerOS: Debian
+            description: (x86_64)
             os: ubuntu-latest
           - dockerImage: armv6l
-            dockerStage: Debian Stretch (Raspberry Pi v1 & ZERO)
-            dockerFile: armv6l.stretch
+            dockerOS: Debian
+            description: (Raspberry Pi v1 & ZERO)
             os: ubuntu-latest
           - dockerImage: armv7l
-            dockerStage: Debian Stretch (Raspberry Pi 2 & 3)
-            dockerFile: armv7l.stretch
+            dockerOS: Debian
+            description: (Raspberry Pi 2 & 3)
             os: ubuntu-latest
           - dockerImage: aarch64
-            dockerStage: Debian Stretch (Generic AARCH64)
-            dockerFile: aarch64.stretch
+            dockerOS: Debian
+            description: (Generic AARCH64)
             os: ubuntu-latest
           - dockerImage: rpi-raspbian
-            dockerStage: Raspbian Stretch
-            dockerFile: raspbian.stretch
+            dockerOS: Raspbian
+            description:  ""
             os: RPi3
 
     steps:
@@ -44,55 +41,9 @@ jobs:
 
       - name: Build and tag docker image
         run: |
-          docker build -t ghcr.io/hyperion-project/${{ matrix.dockerImage }}:stretch -f ${{ matrix.dockerFile }} .
+          docker build -t ghcr.io/hyperion-project/${{ matrix.dockerImage }}:${{ matrix.dockerTag }} -f ${{ matrix.dockerImage }}.${{ matrix.dockerTag }} .
 
       - name: Publish to GitHub Container/Package Registry
         run: |
           echo ${{ secrets.DOCKER_CI }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-          docker push ghcr.io/hyperion-project/${{ matrix.dockerImage }}:stretch
-
-
-###########################
-###### Debian Buster ######
-###########################
-
-  Buster:
-    name: ${{ matrix.dockerStage }}
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        dockerImage: [ x86_64, armv6l, armv7l, aarch64, rpi-raspbian ]
-        include:
-          - dockerImage: x86_64
-            dockerStage: Debian Buster (x86_64)
-            dockerFile: x86_64.buster
-            os: ubuntu-latest
-          - dockerImage: armv6l
-            dockerStage: Debian Buster (Raspberry Pi v1 & ZERO)
-            dockerFile: armv6l.buster
-            os: ubuntu-latest
-          - dockerImage: armv7l
-            dockerStage: Debian Buster (Raspberry Pi 2 & 3)
-            dockerFile: armv7l.buster
-            os: ubuntu-latest
-          - dockerImage: aarch64
-            dockerStage: Debian Buster (Generic AARCH64)
-            dockerFile: aarch64.buster
-            os: ubuntu-latest
-          - dockerImage: rpi-raspbian
-            dockerStage: Raspbian Buster
-            dockerFile: raspbian.buster
-            os: RPi3
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v1
-
-      - name: Build and tag docker image
-        run: |
-          docker build -t ghcr.io/hyperion-project/${{ matrix.dockerImage }}:buster -f ${{ matrix.dockerFile }} .
-
-      - name: Publish to GitHub Container/Package Registry
-        run: |
-          echo ${{ secrets.DOCKER_CI }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-          docker push ghcr.io/hyperion-project/${{ matrix.dockerImage }}:buster
+          docker push ghcr.io/hyperion-project/${{ matrix.dockerImage }}:${{ matrix.dockerTag }}
