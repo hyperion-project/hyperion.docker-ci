@@ -1,16 +1,30 @@
-# Docker Hyperion compilation <br>[![Docker CI](https://github.com/Hyperion-Project/hyperion.docker-ci/workflows/Docker%20CI/badge.svg)](https://github.com/Hyperion-Project/packages)<br>Provides images to compile Hyperion inside a Docker container.
+# Docker Hyperion compilation
+[![Docker CI](https://github.com/Hyperion-Project/hyperion.docker-ci/workflows/Docker%20CI/badge.svg)](https://github.com/orgs/hyperion-project/packages)<br>
+Provides images (with various tags) to compile Hyperion inside a Docker container.<br>
 Images are available at https://github.com/orgs/hyperion-project/packages
 
-{Image}:{Tag} explanation: Compile Hyperion ON os/hardware(arch) FOR os/hardware(arch)
- - `x86_64:stretch` ON all(x86_64) FOR Debian Stretch (x86_64)
- - `x86_64:buster` ON all(x86_64) FOR Debian Buster (x86_64)
- - `armv6l:stretch` ON all(x86_64) FOR Debian Stretch (Raspberry Pi v1 & ZERO) as cross compilation through qemu
- - `armv6l:buster` ON all(x86_64) FOR Debian Buster (Raspberry Pi v1 & ZERO) as cross compilation through qemu
- - `armv7l:stretch` ON all(x86_64) FOR Debian Stretch (Raspberry Pi 2 & 3) as cross compilation through qemu
- - `armv7l:buster` ON all(x86_64) FOR Debian Buster (Raspberry Pi 2 & 3) as cross compilation through qemu
- - `aarch64:stretch` ON all(x86_64) FOR Debian Stretch (Generic AARCH64) as cross compilation through qemu
- - `aarch64:buster` ON all(x86_64) FOR Debian Stretch (Generic AARCH64) as cross compilation through qemu
- - `rpi-raspbian:stretch` ON Raspberry Pi(armv6l, armv7l) FOR Raspbian Stretch (Raspberry Pi v1, ZERO, 2 & 3) as native compilation
- - `rpi-raspbian:buster` ON Raspberry Pi(armv6l, armv7l) FOR Raspbian Buster (Raspberry Pi v1, ZERO, 2 & 3) as native compilation
+<br>
 
-You can run these compiled binaries always on newer OS versions or comparable linux distributions, but never on older ones
+**Compile Hyperion ON x86_64 FOR os/hardware(arch) as cross compilation through qemu:**
+
+|     Image:Tag     	|                os/hardware(arch)               	|
+|:-----------------:	|:----------------------------------------------:	|
+| `x86_64:stretch`  	| Debian Stretch/Generic (x86_64)                	|
+| `x86_64:buster`   	| Debian Buster/Generic (x86_64)                 	|
+| `armv6l:stretch`  	| Debian Stretch/Raspberry Pi v1 & ZERO (armv6l) 	|
+| `armv6l:buster`   	| Debian Buster/Raspberry Pi v1 & ZERO (armv6l)  	|
+| `armv7l:stretch`  	| Debian Stretch/Raspberry Pi 2, 3, 4 (armv7l)     	|
+| `armv7l:buster`   	| Debian Buster/Raspberry Pi 2, 3, 4 (armv7l)      	|
+| `aarch64:stretch` 	| Debian Stretch/Generic (AArch64)               	|
+| `aarch64:buster`  	| Debian Buster/Generic (AArch64)                	|
+
+<br>
+
+**Compile Hyperion ON Raspberry Pi(armv6l, armv7l) FOR os/hardware(arch) as native compilation:**
+
+|        Image:Tag       	|                         os/hardware(arch)                        	|
+|:----------------------:	|:----------------------------------------------------------------:	|
+| `rpi-raspbian:stretch` 	| Raspbian Stretch/Raspberry Pi v1, ZERO, 2, 3, 4 (armv6l, armv7l) 	|
+| `rpi-raspbian:stretch` 	| Raspbian Buster/Raspberry Pi v1, ZERO, 2, 3, 4 (armv6l, armv7l)  	|
+
+Notes: You can run these compiled binaries always on newer OS versions or comparable linux distributions, but never on older ones
