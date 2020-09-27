@@ -1,20 +1,20 @@
-FROM balenalib/raspberry-pi:stretch-build as builder
+ARG SUITE="stretch"
+FROM balenalib/raspberry-pi:${SUITE}-build
+ARG SUITE
 
 LABEL maintainer="Hyperion Project <admin@hyperion-project.org>" \
 	org.opencontainers.image.title="armv6l" \
-	org.opencontainers.image.description="Compile Hyperion for Debian Stretch (Raspberry Pi v1 & ZERO)" \
-	org.opencontainers.image.url="https://github.com/hyperion-project/hyperion.ng" \
-	org.opencontainers.image.source="git@github.com:hyperion-project/hyperion.ng" \
+	org.opencontainers.image.description="Compile Hyperion for Debian ${SUITE} (Raspberry Pi v1 & ZERO)" \
+	org.opencontainers.image.url="https://github.com/hyperion-project" \
+	org.opencontainers.image.source="https://github.com/hyperion-project/hyperion.docker-ci" \
 	org.opencontainers.image.vendor="Hyperion Project"
 
 ENV QEMU_EXECVE 1
 
 RUN [ "cross-build-start" ]
 
-# install hyperion compile deps
-# additional zlib1g-dev and libraspberrypi-dev
-RUN apt-get update \
-	&& apt-get install -y \
+# install deps
+RUN install_packages \
 	git \
 	cmake \
 	python3-dev \

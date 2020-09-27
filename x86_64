@@ -1,0 +1,41 @@
+ARG SUITE="stretch"
+FROM balenalib/amd64-debian:${SUITE}-build
+ARG SUITE
+
+LABEL maintainer="Hyperion Project <admin@hyperion-project.org>" \
+	org.opencontainers.image.title="x86_64" \
+	org.opencontainers.image.description="Compile Hyperion for Debian ${SUITE} (x86_64)" \
+	org.opencontainers.image.url="https://github.com/hyperion-project" \
+	org.opencontainers.image.source="https://github.com/hyperion-project/hyperion.docker-ci" \
+	org.opencontainers.image.vendor="Hyperion Project"
+
+# install general deps
+RUN install_packages \
+	git \
+	cmake \
+	python3-dev \
+	rpm \
+	qtbase5-dev \
+	libqt5serialport5-dev \
+	libqt5sql5-sqlite \
+	libqt5svg5-dev \
+	libqt5x11extras5-dev \
+	build-essential \
+	libusb-1.0-0-dev \
+	libcec-dev \
+	libavahi-core-dev \
+	libavahi-compat-libdnssd-dev \
+	libxcb-util0-dev \
+	libxcb-randr0-dev \
+	libxcb-shm0-dev \
+	libxcb-render0-dev \
+	libxcb-image0-dev \
+	libxrandr-dev \
+	libxrender-dev
+
+# install arch specific deps
+RUN if [ "$SUITE" = "stretch" ]; then \
+        install_packages libssl1.0-dev; \
+    else \
+        install_packages libssl-dev; \
+    fi

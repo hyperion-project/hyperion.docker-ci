@@ -1,0 +1,42 @@
+ARG SUITE="stretch"
+FROM balenalib/aarch64-debian:${SUITE}-build
+ARG SUITE
+
+LABEL maintainer="Hyperion Project <admin@hyperion-project.org>" \
+	org.opencontainers.image.title="aarch64" \
+	org.opencontainers.image.description="Compile Hyperion for Debian ${SUITE} (Generic AARCH64)" \
+	org.opencontainers.image.url="https://github.com/hyperion-project" \
+	org.opencontainers.image.source="https://github.com/hyperion-project/hyperion.docker-ci" \
+	org.opencontainers.image.vendor="Hyperion Project"
+
+ENV QEMU_EXECVE 1
+
+RUN [ "cross-build-start" ]
+
+# install general deps
+RUN install_packages \
+	git \
+	cmake \
+	python3-dev \
+	qtbase5-dev \
+	libqt5serialport5-dev \
+	libqt5sql5-sqlite \
+	libqt5svg5-dev \
+	build-essential \
+	libusb-1.0-0-dev \
+	libavahi-core-dev \
+	libavahi-compat-libdnssd-dev \
+	zlib1g-dev \
+	libcec-dev
+
+# install arch specific deps
+RUN if [ "$SUITE" = "stretch" ]; then \
+        install_packages libssl1.0-dev; \
+    else \
+        install_packages libssl-dev; \
+    fi
+
+RUN [ "cross-build-end" ]
+
+# we use always qemu
+ENTRYPOINT ["/usr/bin/qemu-aarch64-static"]

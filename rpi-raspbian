@@ -1,0 +1,28 @@
+ARG SUITE="stretch"
+FROM balenalib/rpi-raspbian:${SUITE}
+ARG SUITE
+
+LABEL maintainer="Hyperion Project <admin@hyperion-project.org>" \
+	org.opencontainers.image.title="rpi-raspbian-${SUITE}" \
+	org.opencontainers.image.description="Compile Hyperion native for Raspbian ${SUITE} (Raspberry Pi v1, ZERO, 2 & 3)" \
+	org.opencontainers.image.url="https://github.com/hyperion-project" \
+	org.opencontainers.image.source="https://github.com/hyperion-project/hyperion.docker-ci" \
+	org.opencontainers.image.vendor="Hyperion Project"
+
+RUN install_packages \
+	git \
+	cmake \
+	python3-dev \
+	qtbase5-dev \
+	libqt5serialport5-dev \
+	libqt5sql5-sqlite \
+	libqt5svg5-dev \
+	build-essential \
+	libusb-1.0-0-dev \
+	libcec-dev \
+	libavahi-core-dev \
+	libavahi-compat-libdnssd-dev \
+	libjpeg-dev \
+	zlib1g-dev \
+	libssl1.0-dev \
+	libraspberrypi-dev

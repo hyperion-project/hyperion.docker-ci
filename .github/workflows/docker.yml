@@ -12,7 +12,7 @@ jobs:
     strategy:
       matrix:
         dockerImage: [ x86_64, armv6l, armv7l, aarch64, rpi-raspbian ]
-        dockerTag: [ stretch, buster ]
+        dockerTag: [ stretch, buster, bullseye ]
         include:
           - dockerImage: x86_64
             dockerOS: Debian
@@ -34,6 +34,10 @@ jobs:
             dockerOS: Raspbian
             description:  ""
             os: RPi3
+        exclude:
+          # exclude bullseye on rpi-raspbian
+          - dockerImage: rpi-raspbian
+            dockerTag: bullseye
 
     steps:
       - name: Checkout
@@ -41,7 +45,7 @@ jobs:
 
       - name: Build and tag docker image
         run: |
-          docker build -t ghcr.io/hyperion-project/${{ matrix.dockerImage }}:${{ matrix.dockerTag }} -f ${{ matrix.dockerImage }}.${{ matrix.dockerTag }} .
+          docker build -t ghcr.io/hyperion-project/${{ matrix.dockerImage }}:${{ matrix.dockerTag }} --build-arg SUITE=${{ matrix.dockerTag }} -f ${{ matrix.dockerImage }} .
 
       - name: Publish to GitHub Container/Package Registry
         run: |
