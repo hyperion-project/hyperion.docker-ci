@@ -29,6 +29,13 @@ RUN install_packages \
 	zlib1g-dev \
 	libcec-dev
 
+# install arch specific deps
+RUN if [ "$SUITE" = "stretch" ]; then \
+        install_packages libssl1.0-dev; \
+    else \
+        install_packages libssl-dev; \
+    fi
+
 RUN [ "cross-build-end" ]
 
 # we use always qemu

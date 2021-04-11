@@ -32,3 +32,10 @@ RUN install_packages \
 	libxcb-image0-dev \
 	libxrandr-dev \
 	libxrender-dev
+
+# install arch specific deps
+RUN if [ "$SUITE" = "stretch" ]; then \
+        install_packages libssl1.0-dev; \
+    else \
+        install_packages libssl-dev; \
+    fi
