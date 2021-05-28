@@ -31,7 +31,8 @@ RUN install_packages \
 	libxcb-render0-dev \
 	libxcb-image0-dev \
 	libxrandr-dev \
-	libxrender-dev
+	libxrender-dev \
+	libturbojpeg0-dev
 
 # install arch specific deps
 RUN if [ "$SUITE" = "stretch" ]; then \

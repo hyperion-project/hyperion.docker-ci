@@ -25,4 +25,5 @@ RUN install_packages \
 	libjpeg-dev \
 	zlib1g-dev \
 	libssl1.0-dev \
-	libraspberrypi-dev
+	libraspberrypi-dev \
+	libturbojpeg0-dev

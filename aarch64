@@ -27,7 +27,8 @@ RUN install_packages \
 	libavahi-core-dev \
 	libavahi-compat-libdnssd-dev \
 	zlib1g-dev \
-	libcec-dev
+	libcec-dev \
+	libturbojpeg0-dev
 
 # install arch specific deps
 RUN if [ "$SUITE" = "stretch" ]; then \

@@ -29,7 +29,8 @@ RUN install_packages \
 	libavahi-compat-libdnssd-dev \
 	zlib1g-dev \
 	libraspberrypi-dev \
-	libssl1.0-dev
+	libssl1.0-dev \
+	libturbojpeg0-dev
 
 RUN [ "cross-build-end" ]
 
