@@ -16,7 +16,6 @@ RUN [ "cross-build-start" ]
 # install deps
 RUN install_packages \
 	git \
-	cmake \
 	python3-dev \
 	qtbase5-dev \
 	libqt5serialport5-dev \
@@ -30,7 +29,15 @@ RUN install_packages \
 	zlib1g-dev \
 	libraspberrypi-dev \
 	libssl1.0-dev \
-	libturbojpeg0-dev
+	libturbojpeg0-dev && \
+	if [ "$SUITE" = "buster" ]; then \
+		apt-get update && apt-get install -y cmake=3.13.4-1 cmake-data=3.13.4-1; \
+	else \
+		install_packages cmake; \
+	fi && \
+	apt-get clean -q -y && \
+	apt-get autoremove -y && \
+	rm -rf /var/lib/apt/lists/*
 
 RUN [ "cross-build-end" ]
 
