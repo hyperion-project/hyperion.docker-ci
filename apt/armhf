@@ -1,0 +1,53 @@
+ARG DIST="debian"
+ARG SUITE="buster"
+FROM balenalib/${DIST}:${SUITE}
+ARG DIST
+ARG SUITE
+
+LABEL maintainer="Hyperion Project <admin@hyperion-project.org>" \
+	org.opencontainers.image.title="armhf" \
+	org.opencontainers.image.description="Compilation environment to build the Debian ${SUITE} (armhf) APT packages" \
+	org.opencontainers.image.url="https://github.com/hyperion-project" \
+	org.opencontainers.image.source="https://github.com/hyperion-project/hyperion.docker-ci" \
+	org.opencontainers.image.vendor="Hyperion Project"
+
+ENV DEBFULLNAME="Hyperion Project" \
+    DEBEMAIL="admin@hyperion-project.org"
+
+ENV QEMU_EXECVE 1
+RUN [ "cross-build-start" ]
+
+# install deps
+ARG DEBIAN_FRONTEND=noninteractive
+RUN \
+	install_packages \
+	devscripts \
+	fakeroot \
+	libdistro-info-perl \
+	git \
+	python3-dev \
+	qtbase5-dev \
+	libqt5serialport5-dev \
+	libqt5sql5-sqlite \
+	libqt5svg5-dev \
+	build-essential \
+	libusb-1.0-0-dev \
+	libcec-dev \
+	libavahi-core-dev \
+	libavahi-compat-libdnssd-dev \
+	zlib1g-dev \
+	libraspberrypi-dev \
+	libssl1.0-dev \
+	libturbojpeg0-dev \
+	libmbedtls-dev && \
+	if [ "$SUITE" = "buster" ]; then \
+		apt-get update && apt-get install -y cmake=3.13.4-1 cmake-data=3.13.4-1; \
+	else \
+		install_packages cmake; \
+	fi && \
+	apt-get clean -q -y && \
+	apt-get autoremove -y && \
+	rm -rf /var/lib/apt/lists/*
+
+RUN [ "cross-build-end" ]
+ENTRYPOINT ["/usr/bin/qemu-arm-static"]
