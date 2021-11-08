@@ -32,6 +32,12 @@
 			"description": "Ubuntu 21.10 (Impish Indri) (amd64)"
 		},
 		{
+			"dist": "ubuntu",
+			"tag": "jammy",
+			"file": "amd64",
+			"description": "Ubuntu 22.04 (Jammy Jellyfish) (amd64)"
+		},
+		{
 			"dist": "debian",
 			"tag": "stretch",
 			"file": "amd64",
@@ -66,6 +72,18 @@
 			"tag": "bullseye",
 			"file": "armhf",
 			"description": "Debian 11.x (Bullseye) (armhf)"
+		},
+		{
+			"dist": "debian",
+			"tag": "bookworm",
+			"file": "amd64",
+			"description": "Debian 11.x (Bookworm) (amd64)"
+		},
+		{
+			"dist": "rpi-debian",
+			"tag": "bookworm",
+			"file": "armhf",
+			"description": "Debian 11.x (Bookworm) (armhf)"
 		}
 	]
 }
