@@ -1,0 +1,38 @@
+[
+	{
+		"dist": "aarch64-ubuntu",
+		"tag": "bionic",
+		"file": "arm64",
+		"description": "Ubuntu 18.04 (Bionic Beaver) (arm64)"
+	},
+	{
+		"dist": "aarch64-ubuntu",
+		"tag": "focal",
+		"file": "arm64",
+		"description": "Ubuntu 20.04 (Focal Fossa) (arm64)"
+	},
+	{
+		"dist": "aarch64-ubuntu",
+		"tag": "hirsute",
+		"file": "arm64",
+		"description": "Ubuntu 21.04 (Hirsute Hippo) (arm64)"
+	},
+	{
+		"dist": "aarch64-ubuntu",
+		"tag": "impish",
+		"file": "arm64",
+		"description": "Ubuntu 21.10 (Impish Indri) (arm64)"
+	},
+	{
+		"dist": "aarch64-debian",
+		"tag": "buster",
+		"file": "arm64",
+		"description": "Debian 10.x (Buster) (arm64)"
+	},
+	{
+		"dist": "aarch64-debian",
+		"tag": "bullseye",
+		"file": "arm64",
+		"description": "Debian 11.x (Bullseye) (arm64)"
+	}
+]

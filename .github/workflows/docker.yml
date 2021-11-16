@@ -33,7 +33,7 @@ jobs:
           - dockerImage: rpi-raspbian
             dockerOS: Raspbian
             description:  ""
-            os: RPi3
+            os: RPi
         exclude:
           # exclude bookworm on armv7l (not available on docker hub on 08.11.2021 URL: https://hub.docker.com/r/balenalib/raspberry-pi2/tags)
           - dockerImage: armv7l

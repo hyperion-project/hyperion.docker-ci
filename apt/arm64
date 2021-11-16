@@ -1,12 +1,12 @@
-ARG DIST="debian"
+ARG DIST="aarch64-debian"
 ARG SUITE="buster"
 FROM balenalib/${DIST}:${SUITE}-build
 ARG DIST
 ARG SUITE
 
 LABEL maintainer="Hyperion Project <admin@hyperion-project.org>" \
-	org.opencontainers.image.title="armhf" \
-	org.opencontainers.image.description="Compilation environment to build the ${DIST} ${SUITE} (armhf) APT packages" \
+	org.opencontainers.image.title="arm64" \
+	org.opencontainers.image.description="Compilation environment to build the ${DIST} ${SUITE} (arm64) APT packages" \
 	org.opencontainers.image.url="https://github.com/hyperion-project" \
 	org.opencontainers.image.source="https://github.com/hyperion-project/hyperion.docker-ci" \
 	org.opencontainers.image.vendor="Hyperion Project"
@@ -17,13 +17,19 @@ ENV DEBFULLNAME="Hyperion Project" \
 ENV QEMU_EXECVE 1
 RUN [ "cross-build-start" ]
 
-# install deps (Note: Ubuntu without DispmanX / CMake for Focal from Bionic source)
+RUN if [ "$DIST" = "aarch64-debian" ]; then \
+        echo "deb http://archive.raspberrypi.org/debian ${SUITE} main ui" >>  /etc/apt/sources.list.d/raspi.list && \
+        apt-key adv --batch --keyserver keyserver.ubuntu.com  --recv-key 0x82B129927FA3303E; \
+    fi
+
+# install deps
 ARG DEBIAN_FRONTEND=noninteractive
 RUN \
 	install_packages \
 	devscripts \
 	fakeroot \
 	libdistro-info-perl \
+    cmake \
 	git \
 	python3-dev \
 	qtbase5-dev \
@@ -38,32 +44,19 @@ RUN \
 	zlib1g-dev \
 	libturbojpeg0-dev \
 	libmbedtls-dev && \
-	if [ "$DIST" = "armv7hf-ubuntu" ]; then \
+    if [ "$DIST" = "aarch64-ubuntu" ]; then \
 		install_packages libqt5x11extras5-dev libxcb-util0-dev libxcb-randr0-dev libxcb-shm0-dev libxcb-render0-dev libxcb-image0-dev libxrandr-dev libxrender-dev; \
 		if [ "$SUITE" = "bionic" ]; then \
 			install_packages libssl1.0-dev; \
+        else \
+            install_packages libssl-dev; \
 		fi; \
-	else \
-		install_packages libraspberrypi-dev; \
-		if [ "$SUITE" = "stretch" ] || [ "$SUITE" = "buster" ]; then \
-			install_packages libssl1.0-dev; \
-		else \
-			install_packages libssl-dev; \
-		fi; \
-	fi && \
-	if [ "$SUITE" = "buster" ]; then \
-		apt-get update && apt-get install -y cmake=3.13.4-1 cmake-data=3.13.4-1; \
-	elif [ "$SUITE" = "focal" ]; then \
-		echo "deb [arch=armhf] http://ports.ubuntu.com/ bionic main restricted" > /etc/apt/sources.list.d/groovy-sources.list; \
-		apt-get update; \
-		apt-get -t bionic -y --no-install-recommends install cmake; \
-		rm /etc/apt/sources.list.d/groovy-sources.list; \
-	else \
-		install_packages cmake; \
-	fi && \
+    else \
+        install_packages libraspberrypi-dev libssl-dev; \
+    fi && \
 	apt-get clean -q -y && \
 	apt-get autoremove -y && \
 	rm -rf /var/lib/apt/lists/*
 
 RUN [ "cross-build-end" ]
-ENTRYPOINT ["/usr/bin/qemu-arm-static"]
+ENTRYPOINT ["/usr/bin/qemu-aarch64-static"]

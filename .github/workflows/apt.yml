@@ -14,7 +14,7 @@ jobs:
       - name: Set APT matrix
         id: apt-ppa
         run: |
-          APT=$(echo $(cat apt/apt.json) | jq --compact-output .)
+          APT=$(jq -n '.include |= [inputs[]]' apt/*.json --compact-output)
           echo "::set-output name=apt::$APT"
     outputs:
       apt-matrix: ${{ steps.apt-ppa.outputs.apt }}
