@@ -13,12 +13,6 @@
 	},
 	{
 		"dist": "armv7hf-ubuntu",
-		"tag": "hirsute",
-		"file": "armhf",
-		"description": "Ubuntu 21.04 (Hirsute Hippo) (armhf)"
-	},
-	{
-		"dist": "armv7hf-ubuntu",
 		"tag": "impish",
 		"file": "armhf",
 		"description": "Ubuntu 21.10 (Impish Indri) (armhf)"
