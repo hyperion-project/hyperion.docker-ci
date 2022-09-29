@@ -12,12 +12,6 @@
 		"description": "Ubuntu 20.04 (Focal Fossa) (arm64)"
 	},
 	{
-		"dist": "aarch64-ubuntu",
-		"tag": "impish",
-		"file": "arm64",
-		"description": "Ubuntu 21.10 (Impish Indri) (arm64)"
-	},
-	{
 		"dist": "aarch64-debian",
 		"tag": "buster",
 		"file": "arm64",

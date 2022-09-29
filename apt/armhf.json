@@ -12,12 +12,6 @@
 		"description": "Ubuntu 20.04 (Focal Fossa) (armhf)"
 	},
 	{
-		"dist": "armv7hf-ubuntu",
-		"tag": "impish",
-		"file": "armhf",
-		"description": "Ubuntu 21.10 (Impish Indri) (armhf)"
-	},
-	{
 		"dist": "rpi-debian",
 		"tag": "stretch",
 		"file": "armhf",

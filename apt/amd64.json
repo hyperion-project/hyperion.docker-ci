@@ -13,12 +13,6 @@
 	},
 	{
 		"dist": "ubuntu",
-		"tag": "impish",
-		"file": "amd64",
-		"description": "Ubuntu 21.10 (Impish Indri) (amd64)"
-	},
-	{
-		"dist": "ubuntu",
 		"tag": "jammy",
 		"file": "amd64",
 		"description": "Ubuntu 22.04 (Jammy Jellyfish) (amd64)"
