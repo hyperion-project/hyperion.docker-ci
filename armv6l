@@ -29,6 +29,7 @@ RUN install_packages \
 	zlib1g-dev \
 	libraspberrypi-dev \
 	libssl1.0-dev \
+	libjpeg-dev \
 	libturbojpeg0-dev && \
 	if [ "$SUITE" = "buster" ]; then \
 		apt-get update && apt-get install -y cmake=3.13.4-1 cmake-data=3.13.4-1; \

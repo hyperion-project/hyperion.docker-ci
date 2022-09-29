@@ -33,6 +33,7 @@ RUN \
 	libqt5sql5-sqlite \
 	libqt5svg5-dev \
 	libqt5x11extras5-dev \
+	libjpeg-dev \
 	libturbojpeg0-dev \
 	libusb-1.0-0-dev \
 	libxcb-util0-dev \

@@ -28,6 +28,7 @@ RUN install_packages \
 	libavahi-compat-libdnssd-dev \
 	zlib1g-dev \
 	libcec-dev \
+	libjpeg-dev \
 	libturbojpeg0-dev
 
 # install arch specific deps
