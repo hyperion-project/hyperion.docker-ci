@@ -45,6 +45,6 @@
 		"dist": "debian",
 		"tag": "bookworm",
 		"file": "amd64",
-		"description": "Debian 11.x (Bookworm) (amd64)"
+		"description": "Debian 12.x (Bookworm) (amd64)"
 	}
 ]

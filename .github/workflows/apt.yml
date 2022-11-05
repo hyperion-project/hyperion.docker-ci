@@ -10,12 +10,13 @@ jobs:
     name: Setup Matrix build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Set APT matrix
         id: apt-ppa
         run: |
-          APT=$(jq -n '.include |= [inputs[]]' apt/*.json --compact-output)
-          echo "::set-output name=apt::$APT"
+          APT=$(jq -n '.include |= [ inputs[] | select(.["exclude"] != true)]' apt/*.json --compact-output)
+          echo "apt=${APT}" >> $GITHUB_OUTPUT
+
     outputs:
       apt-matrix: ${{ steps.apt-ppa.outputs.apt }}
 
@@ -28,7 +29,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v1
+        uses: actions/checkout@v3
 
       - name: Build and tag docker image
         run: docker build -t ghcr.io/hyperion-project/${{ matrix.file }}:${{ matrix.tag }} --build-arg DIST=${{ matrix.dist }} --build-arg SUITE=${{ matrix.tag }}  -f apt/${{ matrix.file }} .

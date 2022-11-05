@@ -33,6 +33,7 @@
 		"dist": "rpi-debian",
 		"tag": "bookworm",
 		"file": "armhf",
-		"description": "Debian 12.x (Bookworm) (armhf)"
+		"description": "Debian 12.x (Bookworm) (armhf)",
+		"exclude" : true
 	}
 ]

@@ -9,6 +9,10 @@ LABEL maintainer="Hyperion Project <admin@hyperion-project.org>" \
 	org.opencontainers.image.source="https://github.com/hyperion-project/hyperion.docker-ci" \
 	org.opencontainers.image.vendor="Hyperion Project"
 
+ENV QEMU_EXECVE 1
+
+RUN [ "cross-build-start" ]
+
 RUN install_packages \
 	git \
 	cmake \
@@ -28,3 +32,8 @@ RUN install_packages \
 	libraspberrypi-dev \
 	libjpeg-dev \
 	libturbojpeg0-dev
+
+RUN [ "cross-build-end" ]
+
+# we use always qemu
+ENTRYPOINT ["/usr/bin/qemu-arm-static"]

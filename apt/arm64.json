@@ -22,5 +22,12 @@
 		"tag": "bullseye",
 		"file": "arm64",
 		"description": "Debian 11.x (Bullseye) (arm64)"
+	},
+	{
+		"dist": "aarch64-debian",
+		"tag": "bookworm",
+		"file": "arm64",
+		"description": "Debian 12.x (Bookworm) (arm64)",
+		"exclude" : true
 	}
 ]
