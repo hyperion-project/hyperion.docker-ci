@@ -12,6 +12,18 @@
 		"description": "Ubuntu 20.04 (Focal Fossa) (arm64)"
 	},
 	{
+		"dist": "aarch64-ubuntu",
+		"tag": "jammy",
+		"file": "arm64",
+		"description": "Ubuntu 22.04 (Jammy Jellyfish) (arm64)"
+	},
+	{
+		"dist": "aarch64-ubuntu",
+		"tag": "kinetic",
+		"file": "arm64",
+		"description": "Ubuntu 22.10 (Kinetic Kudu) (arm64)"
+	},
+	{
 		"dist": "aarch64-debian",
 		"tag": "buster",
 		"file": "arm64",
