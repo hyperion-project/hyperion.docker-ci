@@ -29,6 +29,7 @@ RUN install_packages \
 	zlib1g-dev \
 	libraspberrypi-dev \
 	libssl1.0-dev \
+	libasound2-dev \
 	libjpeg-dev \
 	libturbojpeg0-dev && \
 	if [ "$SUITE" = "buster" ]; then \

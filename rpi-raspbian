@@ -8,7 +8,7 @@ LABEL maintainer="Hyperion Project <admin@hyperion-project.org>" \
 	org.opencontainers.image.url="https://github.com/hyperion-project" \
 	org.opencontainers.image.source="https://github.com/hyperion-project/hyperion.docker-ci" \
 	org.opencontainers.image.vendor="Hyperion Project"
-
+	
 ENV QEMU_EXECVE 1
 
 RUN [ "cross-build-start" ]
@@ -30,9 +30,10 @@ RUN install_packages \
 	zlib1g-dev \
 	libssl1.0-dev \
 	libraspberrypi-dev \
+	libasound2-dev \
 	libjpeg-dev \
 	libturbojpeg0-dev
-
+	
 RUN [ "cross-build-end" ]
 
 # we use always qemu

@@ -36,6 +36,7 @@ RUN \
 	libavahi-core-dev \
 	libavahi-compat-libdnssd-dev \
 	zlib1g-dev \
+	libasound2-dev \
 	libjpeg-dev \
 	libturbojpeg0-dev \
 	libmbedtls-dev && \
