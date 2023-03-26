@@ -30,7 +30,8 @@ RUN install_packages \
 	libcec-dev \
 	libasound2-dev \
 	libjpeg-dev \
-	libturbojpeg0-dev
+	libturbojpeg0-dev \
+	libftdi1-dev
 
 # install arch specific deps
 RUN if [ "$SUITE" = "stretch" ]; then \
