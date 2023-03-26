@@ -39,7 +39,8 @@ RUN \
 	libasound2-dev \
 	libjpeg-dev \
 	libturbojpeg0-dev \
-	libmbedtls-dev && \
+	libmbedtls-dev \
+	libftdi1-dev && \
 	if [ "$DIST" = "armv7hf-ubuntu" ]; then \
 		install_packages libqt5x11extras5-dev libxcb-util0-dev libxcb-randr0-dev libxcb-shm0-dev libxcb-render0-dev libxcb-image0-dev libxrandr-dev libxrender-dev; \
 		if [ "$SUITE" = "bionic" ]; then \

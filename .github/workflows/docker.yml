@@ -11,7 +11,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        dockerImage: [ x86_64, armv6l, armv7l, aarch64, rpi-raspbian ]
+        dockerImage: [ x86_64, armv6l, armv7l, aarch64 ]
         dockerTag: [ stretch, buster, bullseye, bookworm ]
         include:
           - dockerImage: x86_64
@@ -30,14 +30,6 @@ jobs:
             dockerOS: Debian
             description: (Generic AARCH64)
             os: ubuntu-latest
-          - dockerImage: rpi-raspbian
-            dockerOS: Raspbian
-            description:  ""
-            os: ubuntu-latest
-        exclude:
-          # exclude bookworm on armv7l (not available on docker hub on 03.11.2022 URL: https://hub.docker.com/r/balenalib/raspberry-pi2/tags)
-          - dockerImage: armv7l
-            dockerTag: bookworm
 
     steps:
       - name: Checkout
@@ -48,6 +40,9 @@ jobs:
           docker build -t ghcr.io/hyperion-project/${{ matrix.dockerImage }}:${{ matrix.dockerTag }} --build-arg SUITE=${{ matrix.dockerTag }} -f ${{ matrix.dockerImage }} .
 
       - name: Publish to GitHub Container/Package Registry
+        env:
+            SECRET_DOCKER_CI: ${{ secrets.DOCKER_CI }}
+        if: ${{ env.SECRET_DOCKER_CI != null }}
         run: |
           echo ${{ secrets.DOCKER_CI }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
           docker push ghcr.io/hyperion-project/${{ matrix.dockerImage }}:${{ matrix.dockerTag }}

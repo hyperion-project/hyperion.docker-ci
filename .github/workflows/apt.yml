@@ -34,7 +34,10 @@ jobs:
       - name: Build and tag docker image
         run: docker build -t ghcr.io/hyperion-project/${{ matrix.file }}:${{ matrix.tag }} --build-arg DIST=${{ matrix.dist }} --build-arg SUITE=${{ matrix.tag }}  -f apt/${{ matrix.file }} .
 
-      - name: Publish to GitHub Container Registry
+      - name: Publish to GitHub Container/Package Registry
+        env:
+            SECRET_DOCKER_CI: ${{ secrets.DOCKER_CI }}
+        if: ${{ env.SECRET_DOCKER_CI != null }}
         run: |
           echo ${{ secrets.DOCKER_CI }} | docker login ghcr.io -u ${{ github.repository_owner }} --password-stdin
           docker push ghcr.io/hyperion-project/${{ matrix.file }}:${{ matrix.tag }}
