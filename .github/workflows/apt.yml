@@ -33,8 +33,16 @@ jobs:
 
       - name: Build and tag docker image
         run: docker build -t ghcr.io/hyperion-project/${{ matrix.file }}:${{ matrix.tag }} --build-arg DIST=${{ matrix.dist }} --build-arg SUITE=${{ matrix.tag }}  -f apt/${{ matrix.file }} .
+      - name: Check whether we should publsh to GitHub Container/Package Registry
+        id: enabledockerpublish
+        env:
+            SECRET_DOCKER_CI: ${{ secrets.DOCKER_CI }}
+        run: |
+            echo "Enable docker publish: ${{ env.SECRET_DOCKER_CI != '' }}"
+            echo "::set-output name=enabledockerpublish::${{ env.SECRET_DOCKER_CI != '' }}"
 
       - name: Publish to GitHub Container Registry
+        if: steps.enabledockerpublish.outputs.enabledockerpublish == 'true'
         run: |
           echo ${{ secrets.DOCKER_CI }} | docker login ghcr.io -u ${{ github.repository_owner }} --password-stdin
           docker push ghcr.io/hyperion-project/${{ matrix.file }}:${{ matrix.tag }}
