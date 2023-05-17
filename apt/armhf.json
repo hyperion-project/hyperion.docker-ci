@@ -1,12 +1,6 @@
 [
 	{
 		"dist": "armv7hf-ubuntu",
-		"tag": "bionic",
-		"file": "armhf",
-		"description": "Ubuntu 18.04 (Bionic Beaver) (armhf)"
-	},
-	{
-		"dist": "armv7hf-ubuntu",
 		"tag": "focal",
 		"file": "armhf",
 		"description": "Ubuntu 20.04 (Focal Fossa) (armhf)"
@@ -22,12 +16,6 @@
 		"tag": "kinetic",
 		"file": "armhf",
 		"description": "Ubuntu 22.10 (Kinetic Kudu) (armhf)"
-	},
-	{
-		"dist": "rpi-debian",
-		"tag": "stretch",
-		"file": "armhf",
-		"description":"Debian 9.x (Stretch) (armhf)"
 	},
 	{
 		"dist": "rpi-debian",

@@ -32,7 +32,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Build and tag docker image
-        run: docker build -t ghcr.io/hyperion-project/${{ matrix.file }}:${{ matrix.tag }} --build-arg DIST=${{ matrix.dist }} --build-arg SUITE=${{ matrix.tag }}  -f apt/${{ matrix.file }} .
+        run: docker build -t ghcr.io/${{ github.repository_owner }}/${{ matrix.file }}:${{ matrix.tag }} --build-arg DIST=${{ matrix.dist }} --build-arg SUITE=${{ matrix.tag }} --build-arg REPOSITORY="${{ github.server_url}}/${{ github.repository_owner }}" -f apt/${{ matrix.file }} .
 
       - name: Publish to GitHub Container/Package Registry
         env:
@@ -40,4 +40,4 @@ jobs:
         if: ${{ env.SECRET_DOCKER_CI != null }}
         run: |
           echo ${{ secrets.DOCKER_CI }} | docker login ghcr.io -u ${{ github.repository_owner }} --password-stdin
-          docker push ghcr.io/hyperion-project/${{ matrix.file }}:${{ matrix.tag }}
+          docker push ghcr.io/${{ github.repository_owner }}/${{ matrix.file }}:${{ matrix.tag }}

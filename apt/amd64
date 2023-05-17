@@ -1,5 +1,6 @@
 ARG DIST="debian"
 ARG SUITE="buster"
+ARG REPOSITORY="https://github.com/hyperion-project"
 FROM amd64/${DIST}:${SUITE}
 ARG DIST
 ARG SUITE
@@ -7,8 +8,8 @@ ARG SUITE
 LABEL maintainer="Hyperion Project <admin@hyperion-project.org>" \
 	org.opencontainers.image.title="amd64" \
 	org.opencontainers.image.description="Compilation environment to build the ${DIST} ${SUITE} (amd64}) APT packages" \
-	org.opencontainers.image.url="https://github.com/hyperion-project" \
-	org.opencontainers.image.source="https://github.com/hyperion-project/hyperion.docker-ci" \
+	org.opencontainers.image.url="${REPOSITORY}" \
+	org.opencontainers.image.source="${REPOSITORY}/hyperion.docker-ci" \
 	org.opencontainers.image.vendor="Hyperion Project"
 
 ENV DEBFULLNAME="Hyperion Project" \
@@ -47,12 +48,8 @@ RUN \
 	python3-dev \
 	qtbase5-dev \
 	zlib1g-dev \
+	libssl-dev \
 	libftdi1-dev && \
-	if [ "$SUITE" = "bionic" ] || [ "$SUITE" = "stretch" ]; then \
-		apt-get update && apt-get install -yq libssl1.0-dev; \
-	else \
-		apt-get update && apt-get install -yq libssl-dev; \
-	fi && \
 	apt-get clean -q -y && \
 	apt-get autoremove -y && \
 	rm -rf /var/lib/apt/lists/*

@@ -1,12 +1,6 @@
 [
 	{
 		"dist": "ubuntu",
-		"tag": "bionic",
-		"file": "amd64",
-		"description": "Ubuntu 18.04 (Bionic Beaver) (amd64)"
-	},
-	{
-		"dist": "ubuntu",
 		"tag": "focal",
 		"file": "amd64",
 		"description": "Ubuntu 20.04 (Focal Fossa) (amd64)"
@@ -24,10 +18,10 @@
 		"description": "Ubuntu 22.10 (Kinetic Kudu) (amd64)"
 	},
 	{
-		"dist": "debian",
-		"tag": "stretch",
+		"dist": "ubuntu",
+		"tag": "lunar",
 		"file": "amd64",
-		"description": "Debian 9.x (Stretch) (amd64)"
+		"description": "Ubuntu 23.04 (Lunar Lobster) (amd64)"
 	},
 	{
 		"dist": "debian",
