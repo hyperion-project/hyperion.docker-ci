@@ -44,7 +44,7 @@ jobs:
           if [ '${{ github.repository }}' == 'hyperion-project/hyperion.docker-ci' ]; then
             docker build -t ghcr.io/hyperion-project/${{ matrix.file }}:${{ matrix.tag }} --build-arg DIST=${{ matrix.dist }} --build-arg SUITE=${{ matrix.tag }} -f apt/${{ matrix.file }} .
           else
-            docker build -t ghcr.io/${{ env.ACTOR_LC }}/${{ matrix.file }}:${{ matrix.tag }} --build-arg DIST=${{ matrix.dist }} --build-arg SUITE=${{ matrix.tag }} --build-arg REPOSITORY="${{ github.GITHUB_SERVER_URL }}/${{ github.actor }}" -f apt/${{ matrix.file }} .
+            docker build -t ghcr.io/${{ env.ACTOR_LC }}/${{ matrix.file }}:${{ matrix.tag }} --build-arg DIST=${{ matrix.dist }} --build-arg SUITE=${{ matrix.tag }} --build-arg REPOSITORY="${{ github.server_url }}/${{ github.actor }}" -f apt/${{ matrix.file }} .
           fi
 
       - name: Publish to GitHub Container/Package Registry
