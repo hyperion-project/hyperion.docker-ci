@@ -34,10 +34,16 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+        
+      - name: set lower case owner name
+        run: |
+          echo "OWNER_LC=${OWNER,,}" >> ${GITHUB_ENV}
+        env:
+          OWNER: '${{ github.repository_owner }}'        
 
       - name: Build and tag docker image
         run: |
-          docker build -t ghcr.io/${{ github.repository_owner }}/${{ matrix.dockerImage }}:${{ matrix.dockerTag }} --build-arg SUITE=${{ matrix.dockerTag }} --build-arg REPOSITORY="${{ github.server_url}}/${{ github.repository_owner }}" -f ${{ matrix.dockerImage }} .
+          docker build -t ghcr.io/${{ env.OWNER_LC }}/${{ matrix.dockerImage }}:${{ matrix.dockerTag }} --build-arg SUITE=${{ matrix.dockerTag }} --build-arg REPOSITORY="${{ github.server_url}}/${{ github.repository_owner }}" -f ${{ matrix.dockerImage }} .
 
       - name: Publish to GitHub Container/Package Registry
         env:
@@ -45,4 +51,4 @@ jobs:
         if: ${{ env.SECRET_DOCKER_CI != null }}
         run: |
           echo ${{ secrets.DOCKER_CI }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-          docker push ghcr.io/${{ github.repository_owner }}/${{ matrix.dockerImage }}:${{ matrix.dockerTag }}
+          docker push ghcr.io/${{ env.OWNER_LC }}/${{ matrix.dockerImage }}:${{ matrix.dockerTag }}

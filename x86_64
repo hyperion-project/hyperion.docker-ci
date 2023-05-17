@@ -1,4 +1,4 @@
-ARG SUITE="stretch"
+ARG SUITE="buster"
 ARG REPOSITORY="https://github.com/hyperion-project"
 FROM balenalib/amd64-debian:${SUITE}-build
 ARG SUITE
