@@ -1,5 +1,6 @@
 ARG DIST="debian"
 ARG SUITE="buster"
+ARG REPOSITORY="https://github.com/hyperion-project"
 FROM balenalib/${DIST}:${SUITE}-build
 ARG DIST
 ARG SUITE
@@ -7,8 +8,8 @@ ARG SUITE
 LABEL maintainer="Hyperion Project <admin@hyperion-project.org>" \
 	org.opencontainers.image.title="armhf" \
 	org.opencontainers.image.description="Compilation environment to build the ${DIST} ${SUITE} (armhf) APT packages" \
-	org.opencontainers.image.url="https://github.com/hyperion-project" \
-	org.opencontainers.image.source="https://github.com/hyperion-project/hyperion.docker-ci" \
+	org.opencontainers.image.url="${REPOSITORY}" \
+	org.opencontainers.image.source="${REPOSITORY}/hyperion.docker-ci" \
 	org.opencontainers.image.vendor="Hyperion Project"
 
 ENV DEBFULLNAME="Hyperion Project" \

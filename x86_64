@@ -1,12 +1,13 @@
 ARG SUITE="stretch"
+ARG REPOSITORY="https://github.com/hyperion-project"
 FROM balenalib/amd64-debian:${SUITE}-build
 ARG SUITE
 
 LABEL maintainer="Hyperion Project <admin@hyperion-project.org>" \
 	org.opencontainers.image.title="x86_64" \
 	org.opencontainers.image.description="Compile Hyperion for Debian ${SUITE} (x86_64)" \
-	org.opencontainers.image.url="https://github.com/hyperion-project" \
-	org.opencontainers.image.source="https://github.com/hyperion-project/hyperion.docker-ci" \
+	org.opencontainers.image.url="${REPOSITORY}" \
+	org.opencontainers.image.source="${REPOSITORY}/hyperion.docker-ci" \
 	org.opencontainers.image.vendor="Hyperion Project"
 
 # install general deps
