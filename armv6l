@@ -1,5 +1,5 @@
-ARG SUITE="buster
-ARG REPOSITORY="https://github.com/hyperion-project""
+ARG SUITE="buster"
+ARG REPOSITORY="https://github.com/hyperion-project"
 FROM balenalib/raspberry-pi:${SUITE}-build
 ARG SUITE
 
