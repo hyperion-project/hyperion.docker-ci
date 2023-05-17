@@ -24,6 +24,12 @@
 		"description": "Ubuntu 22.10 (Kinetic Kudu) (amd64)"
 	},
 	{
+		"dist": "ubuntu",
+		"tag": "lunar",
+		"file": "amd64",
+		"description": "Ubuntu 23.04 (Lunar Lobster) (amd64)"
+	},
+	{
 		"dist": "debian",
 		"tag": "stretch",
 		"file": "amd64",
