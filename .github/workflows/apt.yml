@@ -24,26 +24,29 @@ jobs:
     name: ${{ matrix.description }}
     needs: [setup]
     runs-on: ubuntu-latest
+    env:
+      SECRET_DOCKER_CI: ${{ secrets.DOCKER_CI }}
     strategy:
       matrix: ${{ fromJson(needs.setup.outputs.apt-matrix) }}
 
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-        
-      - name: set lower case owner name
-        run: |
-          echo "OWNER_LC=${OWNER,,}" >> ${GITHUB_ENV}
-        env:
-          OWNER: '${{ github.repository_owner }}'
 
       - name: Build and tag docker image
-        run: docker build -t ghcr.io/${{ env.OWNER_LC }}/${{ matrix.file }}:${{ matrix.tag }} --build-arg DIST=${{ matrix.dist }} --build-arg SUITE=${{ matrix.tag }} --build-arg REPOSITORY="${{ github.server_url}}/${{ github.repository_owner }}" -f apt/${{ matrix.file }} .
+        run: |
+          if [ '${{ github.repository }}' == 'hyperion-project/hyperion.docker-ci' ]; then
+            docker build -t ghcr.io/hyperion-project/${{ matrix.file }}:${{ matrix.tag }} --build-arg DIST=${{ matrix.dist }} --build-arg SUITE=${{ matrix.tag }} -f apt/${{ matrix.file }} .
+          else
+            docker build -t ghcr.io/${{ github.actor }}/${{ matrix.file }}:${{ matrix.tag }} --build-arg DIST=${{ matrix.dist }} --build-arg SUITE=${{ matrix.tag }} --build-arg REPOSITORY="${{ github.GITHUB_SERVER_URL }}/${{ github.actor }}" -f apt/${{ matrix.file }} .
+          fi
 
       - name: Publish to GitHub Container/Package Registry
-        env:
-            SECRET_DOCKER_CI: ${{ secrets.DOCKER_CI }}
         if: ${{ env.SECRET_DOCKER_CI != null }}
         run: |
-          echo ${{ secrets.DOCKER_CI }} | docker login ghcr.io -u ${{ github.repository_owner }} --password-stdin
-          docker push ghcr.io/${{ env.OWNER_LC }}/${{ matrix.file }}:${{ matrix.tag }}
+          echo ${{ secrets.DOCKER_CI }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+          if [ '${{ github.repository }}' == 'hyperion-project/hyperion.docker-ci' ]; then
+            docker push ghcr.io/hyperion-project/${{ matrix.file }}:${{ matrix.tag }}
+          else
+            docker push ghcr.io/${{ github.actor }}/${{ matrix.file }}:${{ matrix.tag }}
+          fi

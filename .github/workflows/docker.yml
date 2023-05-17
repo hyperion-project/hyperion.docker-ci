@@ -35,15 +35,13 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
         
-      - name: set lower case owner name
-        run: |
-          echo "OWNER_LC=${OWNER,,}" >> ${GITHUB_ENV}
-        env:
-          OWNER: '${{ github.repository_owner }}'        
-
       - name: Build and tag docker image
         run: |
-          docker build -t ghcr.io/${{ env.OWNER_LC }}/${{ matrix.dockerImage }}:${{ matrix.dockerTag }} --build-arg SUITE=${{ matrix.dockerTag }} --build-arg REPOSITORY="${{ github.server_url}}/${{ github.repository_owner }}" -f ${{ matrix.dockerImage }} .
+          if [ '${{ github.repository }}' == 'hyperion-project/hyperion.docker-ci' ]; then
+            docker build -t ghcr.io/hyperion-project/${{ matrix.dockerImage }}:${{ matrix.dockerTag }} --build-arg SUITE=${{ matrix.dockerTag }} -f ${{ matrix.dockerImage }} .
+          else
+            docker build -t ghcr.io/${{ github.actor }}/${{ matrix.dockerImage }}:${{ matrix.dockerTag }} --build-arg SUITE=${{ matrix.dockerTag }} --build-arg REPOSITORY="${{ github.GITHUB_SERVER_URL }}/${{ github.actor }}" -f ${{ matrix.dockerImage }} .
+          fi
 
       - name: Publish to GitHub Container/Package Registry
         env:
@@ -51,4 +49,8 @@ jobs:
         if: ${{ env.SECRET_DOCKER_CI != null }}
         run: |
           echo ${{ secrets.DOCKER_CI }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-          docker push ghcr.io/${{ env.OWNER_LC }}/${{ matrix.dockerImage }}:${{ matrix.dockerTag }}
+          if [ '${{ github.repository }}' == 'hyperion-project/hyperion.docker-ci' ]; then
+            docker push ghcr.io/hyperion-project/${{ matrix.dockerImage }}:${{ matrix.dockerTag }}
+          else
+            docker push ghcr.io/${{ github.actor }}/${{ matrix.dockerImage }}:${{ matrix.dockerTag }}
+          fi
