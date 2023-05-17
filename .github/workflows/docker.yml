@@ -12,7 +12,7 @@ jobs:
     strategy:
       matrix:
         dockerImage: [ x86_64, armv6l, armv7l, aarch64 ]
-        dockerTag: [ stretch, buster, bullseye, bookworm ]
+        dockerTag: [ buster, bullseye, bookworm ]
         include:
           - dockerImage: x86_64
             dockerOS: Debian

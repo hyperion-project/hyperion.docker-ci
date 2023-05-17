@@ -1,12 +1,6 @@
 [
 	{
 		"dist": "aarch64-ubuntu",
-		"tag": "bionic",
-		"file": "arm64",
-		"description": "Ubuntu 18.04 (Bionic Beaver) (arm64)"
-	},
-	{
-		"dist": "aarch64-ubuntu",
 		"tag": "focal",
 		"file": "arm64",
 		"description": "Ubuntu 20.04 (Focal Fossa) (arm64)"

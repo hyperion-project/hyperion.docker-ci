@@ -35,11 +35,6 @@ RUN install_packages \
 	libasound2-dev \
 	libjpeg-dev \
 	libturbojpeg0-dev \
+	libssl-dev \
 	libftdi1-dev
 
-# install arch specific deps
-RUN if [ "$SUITE" = "stretch" ]; then \
-        install_packages libssl1.0-dev; \
-    else \
-        install_packages libssl-dev; \
-    fi

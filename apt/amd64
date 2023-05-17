@@ -47,12 +47,8 @@ RUN \
 	python3-dev \
 	qtbase5-dev \
 	zlib1g-dev \
+	libssl-dev \
 	libftdi1-dev && \
-	if [ "$SUITE" = "bionic" ] || [ "$SUITE" = "stretch" ]; then \
-		apt-get update && apt-get install -yq libssl1.0-dev; \
-	else \
-		apt-get update && apt-get install -yq libssl-dev; \
-	fi && \
 	apt-get clean -q -y && \
 	apt-get autoremove -y && \
 	rm -rf /var/lib/apt/lists/*

@@ -1,4 +1,4 @@
-ARG SUITE="stretch"
+ARG SUITE="buster"
 FROM balenalib/raspberry-pi2:${SUITE}-build
 ARG SUITE
 

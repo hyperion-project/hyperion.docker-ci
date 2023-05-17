@@ -1,4 +1,4 @@
-ARG SUITE="stretch"
+ARG SUITE="buster"
 FROM balenalib/aarch64-debian:${SUITE}-build
 ARG SUITE
 
@@ -31,14 +31,8 @@ RUN install_packages \
 	libasound2-dev \
 	libjpeg-dev \
 	libturbojpeg0-dev \
+	libssl-dev \	
 	libftdi1-dev
-
-# install arch specific deps
-RUN if [ "$SUITE" = "stretch" ]; then \
-        install_packages libssl1.0-dev; \
-    else \
-        install_packages libssl-dev; \
-    fi
 
 RUN [ "cross-build-end" ]
 
