@@ -2,6 +2,7 @@ ARG SUITE="buster"
 ARG REPOSITORY="https://github.com/hyperion-project"
 FROM balenalib/raspberry-pi2:${SUITE}-build
 ARG SUITE
+ARG REPOSITORY
 
 LABEL maintainer="Hyperion Project <admin@hyperion-project.org>" \
 	org.opencontainers.image.title="armv7l" \

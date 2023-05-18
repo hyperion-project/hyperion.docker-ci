@@ -4,10 +4,11 @@ ARG REPOSITORY="https://github.com/hyperion-project"
 FROM amd64/${DIST}:${SUITE}
 ARG DIST
 ARG SUITE
+ARG REPOSITORY
 
 LABEL maintainer="Hyperion Project <admin@hyperion-project.org>" \
 	org.opencontainers.image.title="amd64" \
-	org.opencontainers.image.description="Compilation environment to build the ${DIST} ${SUITE} (amd64}) APT packages" \
+	org.opencontainers.image.description="Compilation environment to build the ${DIST} ${SUITE} (amd64) APT packages" \
 	org.opencontainers.image.url="${REPOSITORY}" \
 	org.opencontainers.image.source="${REPOSITORY}/hyperion.docker-ci" \
 	org.opencontainers.image.vendor="Hyperion Project"

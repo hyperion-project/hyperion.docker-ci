@@ -9,19 +9,15 @@ Images are available at https://github.com/orgs/hyperion-project/packages
 
 |     Image:Tag     	|                os/hardware(arch)      	      	|
 |:-----------------:	|:----------------------------------------------:	|
-| `x86_64:stretch`  	| Debian Stretch/Generic (x86_64)                	|
 | `x86_64:buster`   	| Debian Buster/Generic (x86_64)                 	|
 | `x86_64:bullseye`   	| Debian Bullseye/Generic (x86_64)                 	|
 | `x86_64:bookworm`   	| Debian Bookworm/Generic (x86_64)                 	|
-| `armv6l:stretch`  	| Debian Stretch/Raspberry Pi v1 & ZERO (armv6l) 	|
 | `armv6l:buster`   	| Debian Buster/Raspberry Pi v1 & ZERO (armv6l)  	|
 | `armv6l:bullseye`   	| Debian Bullseye/Raspberry Pi v1 & ZERO (armv6l)  	|
 | `armv6l:bookworm`   	| Debian Bookworm/Raspberry Pi v1 & ZERO (armv6l)  	|
-| `armv7l:stretch`  	| Debian Stretch/Raspberry Pi 2, 3, 4 (armv7l)     	|
 | `armv7l:buster`   	| Debian Buster/Raspberry Pi 2, 3, 4 (armv7l)      	|
-| `armv7l:bullseye`   	| Debian Bullseye/Raspberry Pi 2, 3, 4 (armv7l)	|
-| `armv7l:bookworm`   	| Debian Bookworm/Raspberry Pi 2, 3, 4 (armv7l)	|
-| `aarch64:stretch` 	| Debian Stretch/Generic (AArch64)               	|
+| `armv7l:bullseye`   	| Debian Bullseye/Raspberry Pi 2, 3, 4 (armv7l)     |
+| `armv7l:bookworm`   	| Debian Bookworm/Raspberry Pi 2, 3, 4 (armv7l)     |
 | `aarch64:buster`  	| Debian Buster/Generic (AArch64)                	|
 | `aarch64:bullseye`  	| Debian Bullseye/Generic (AArch64)                	|
 | `aarch64:bookworm`  	| Debian Bookworm/Generic (AArch64)                	|
