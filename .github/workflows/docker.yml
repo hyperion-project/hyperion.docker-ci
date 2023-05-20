@@ -24,7 +24,7 @@ jobs:
             os: ubuntu-latest
           - dockerImage: armv7l
             dockerOS: Debian
-            description: (Raspberry Pi 2 & 3)
+            description: (Raspberry Pi 2, 3 & 4)
             os: ubuntu-latest
           - dockerImage: aarch64
             dockerOS: Debian
