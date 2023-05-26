@@ -34,6 +34,6 @@
 		"tag": "bookworm",
 		"file": "arm64",
 		"description": "Debian 12.x (Bookworm) (arm64)",
-		"exclude" : true
+		"exclude" : false
 	}
 ]

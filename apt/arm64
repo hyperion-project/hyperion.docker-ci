@@ -49,7 +49,7 @@ RUN \
 	libturbojpeg0-dev \
 	libmbedtls-dev \
 	libftdi1-dev && \
-    if [ "$DIST" = "aarch64-ubuntu" ]; then \
+    if [ "$DIST" = "aarch64-ubuntu" ] || [ "$SUITE" = "bookworm" ] ; then \
 		install_packages libqt5x11extras5-dev libxcb-util0-dev libxcb-randr0-dev libxcb-shm0-dev libxcb-render0-dev libxcb-image0-dev libxrandr-dev libxrender-dev libssl-dev; \
     else \
         install_packages libraspberrypi-dev libssl-dev; \
