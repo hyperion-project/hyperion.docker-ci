@@ -1,0 +1,43 @@
+ARG DIST="fedora"
+ARG SUITE="36"
+ARG REPOSITORY="https://github.com/hyperion-project"
+
+FROM ${DIST}:${SUITE}
+
+ARG DIST
+ARG SUITE
+ARG REPOSITORY
+ARG TARGETPLATFORM
+
+# install deps
+RUN dnf -y update && \
+    dnf -y groupinstall 'Development Tools' 'C Development Tools and Libraries' 'RPM Development Tools' && \
+    dnf -y install \
+    fedora-packager \
+    python3-devel \
+    qt5-qtbase-devel \
+    qt5-qtserialport-devel \
+    libXrandr-devel \
+    xcb-util-image-devel \
+    qt5-qtx11extras-devel \
+    turbojpeg-devel \
+    libjpeg-turbo-devel \
+    libusb1-devel \
+    avahi-libs \
+    avahi-compat-libdns_sd-devel \
+    xcb-util-devel \
+    dbus-devel \
+    protobuf-devel \
+    protobuf-compiler \
+    flatbuffers-devel \
+    flatbuffers-compiler \
+    mbedtls-devel \
+    openssl-devel \
+    libcec-devel \
+    alsa-lib-devel
+
+# rpmdev-setuptree will create the ~/rpmbuild directory and a set of subdirectories (e.g. SPECS and BUILD)
+RUN rpmdev-setuptree
+
+# cleanup
+RUN dnf clean all && rm -rf /var/cache/dnf
