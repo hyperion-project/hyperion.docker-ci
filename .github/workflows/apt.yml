@@ -10,7 +10,7 @@ jobs:
     name: Setup Matrix build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Set APT matrix
         id: apt-ppa
         run: |
@@ -31,7 +31,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: set lower case actor name for docker build
         run: |
