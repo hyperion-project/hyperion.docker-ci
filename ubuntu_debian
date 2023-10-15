@@ -1,0 +1,72 @@
+ARG DIST="debian"
+ARG SUITE="buster"
+ARG REPOSITORY="https://github.com/hyperion-project"
+
+FROM ${DIST}:${SUITE}
+
+ARG DIST
+ARG SUITE
+ARG REPOSITORY
+ARG TARGETPLATFORM
+
+ENV TARGETPLATFORM=${TARGETPLATFORM:-linux/amd64}
+ENV DEBFULLNAME="Hyperion Project"
+ENV DEBEMAIL="admin@hyperion-project.org"
+ENV APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=DontWarn
+ENV APT_INSTALL="apt-get -y install --no-install-recommends"
+ENV APT_UPDATE="apt-get -y update"
+
+# install general deps (all platforms/arch/os)
+ARG DEBIAN_FRONTEND=noninteractive
+RUN $APT_UPDATE && $APT_INSTALL \
+    devscripts \
+    fakeroot \
+    debhelper \
+    libdistro-info-perl \
+    git \
+    python3-dev \
+    qtbase5-dev \
+    libqt5serialport5-dev \
+    libqt5sql5-sqlite \
+    libqt5svg5-dev \
+    build-essential \
+    libusb-1.0-0-dev \
+    libcec-dev \
+    libavahi-core-dev \
+    libavahi-compat-libdnssd-dev \
+    zlib1g-dev \
+    libasound2-dev \
+    libjpeg-dev \
+    libturbojpeg0-dev \
+    libmbedtls-dev \
+    libftdi1-dev \
+    libssl-dev
+
+# install cmake (incl. fix for armhf Debian Buster/Focal)
+RUN if [ "$TARGETPLATFORM" = "linux/arm/v7" ]; then \
+    if [ "$SUITE" = "buster" ]; then \
+        $APT_INSTALL cmake=3.13.4-1 cmake-data=3.13.4-1; \
+    elif [ "$SUITE" = "focal" ]; then \
+        echo "deb [arch=armhf] http://ports.ubuntu.com/ bionic main restricted" > /etc/apt/sources.list.d/groovy-sources.list; \
+        $APT_UPDATE && $APT_INSTALL -t bionic cmake; \
+        rm /etc/apt/sources.list.d/groovy-sources.list; \
+    else \
+        $APT_INSTALL cmake; \
+    fi; \
+else \
+    $APT_INSTALL cmake; \
+fi
+
+# install X11/XCB on Ubuntu for all arch and on Debian for amd64
+# install libraspberrypi-dev on Debian for arm64/armhf
+RUN if [ "$DIST" = "ubuntu" ] || [ "$TARGETPLATFORM" = "linux/amd64" ]; then \
+    $APT_INSTALL libqt5x11extras5-dev libxcb-util0-dev libxcb-randr0-dev libxcb-shm0-dev libxcb-render0-dev libxcb-image0-dev libxrandr-dev libxrender-dev; \
+elif [ "$TARGETPLATFORM" = "linux/arm64" ] || [ "$TARGETPLATFORM" = "linux/arm/v7" ] && [ "$SUITE" != "trixie" ]; then \
+    $APT_INSTALL wget gpg dirmngr gpg-agent; \
+    echo "deb http://archive.raspberrypi.org/debian ${SUITE} main ui" >>  /etc/apt/sources.list.d/raspi.list; \
+    apt-key adv --batch --keyserver keyserver.ubuntu.com  --recv-key 0x82B129927FA3303E; \
+    $APT_UPDATE && $APT_INSTALL libraspberrypi-dev; \
+fi
+
+# cleanup
+RUN apt-get clean -q -y && apt-get autoremove -y && rm -rf /var/lib/apt/lists/*

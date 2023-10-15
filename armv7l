@@ -30,7 +30,6 @@ RUN install_packages \
 	libavahi-compat-libdnssd-dev \
 	zlib1g-dev \
 	libraspberrypi-dev \
-	libssl1.0-dev \
 	libasound2-dev \
 	libjpeg-dev \
 	libturbojpeg0-dev \
