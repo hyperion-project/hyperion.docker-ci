@@ -9,7 +9,7 @@ on:
 
 env:
   SECRET_DOCKER_CI: ${{ secrets.DOCKER_CI }}
-  REPOSITORY: paulchen-panther #hyperion-project
+  REPOSITORY: hyperion-project
 
 jobs:
 
@@ -77,7 +77,7 @@ jobs:
             maintainer=Hyperion Project <admin@hyperion-project.org>
             org.opencontainers.image.vendor=Hyperion Project
             org.opencontainers.image.title=${{ matrix.os.description }}
-            org.opencontainers.image.description=Compilation environment to build the RPM packages for the DNF Repository
+            org.opencontainers.image.description=Compilation environment to build the DEB packages for the APT Repository
             org.opencontainers.image.url=${{ github.server_url }}
             org.opencontainers.image.source=${{ github.server_url }}/hyperion.docker-ci
             org.opencontainers.image.documentation=https://docs.hyperion-project.org/
