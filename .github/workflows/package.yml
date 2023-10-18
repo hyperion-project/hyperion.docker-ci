@@ -84,12 +84,12 @@ jobs:
             org.opencontainers.image.documentation=https://docs.hyperion-project.org/
             org.opencontainers.image.licenses=MIT
 
-      - name: 👷 Build and 🚀 Push to GitHub Container/Package Registry
+      - name: 👷 Build amd64
         uses: docker/build-push-action@v5
         with:
           context: .
           file: ubuntu_debian
-          push: ${{ env.SECRET_DOCKER_CI != null }}
+          push: false
           platforms: ${{ matrix.target_platform }}
           provenance: false
           tags: ${{ steps.docker_metadata.outputs.tags }}
@@ -99,20 +99,24 @@ jobs:
             SUITE=${{ matrix.os.codename }}
             REPOSITORY="${{ github.server_url }}/${{ env.REPOSITORY }}"
 
-      - name: Build TEST and Push
+      - name: Build armv6l
         if: ${{ matrix.os.codename == 'buster' }}
         uses: docker/build-push-action@v5
         with:
           context: .
           file: armv6l
-          push: ${{ env.SECRET_DOCKER_CI != null }}
+          push: false
           platforms: linux/arm/v5
           provenance: false
-          tags: ${{ steps.docker_metadata.outputs.tags }}
+          tags: ghcr.io/${{ env.REPOSITORY }}/${{ matrix.os.distribution }}:armv6l
           labels: ${{ steps.docker_metadata.outputs.labels }}
           build-args: |
             SUITE=${{ matrix.os.codename }}
             REPOSITORY="${{ github.server_url }}/${{ env.REPOSITORY }}"
+
+      - name: Combine build images
+        if: ${{ matrix.os.codename == 'buster' }}
+        run: docker buildx imagetools create -t ghcr.io/${{ env.REPOSITORY }}/${{ matrix.os.distribution }}:${{ matrix.os.codename }} --append ghcr.io/${{ env.REPOSITORY }}/${{ matrix.os.distribution }}:armv6l
 
 ####################
 ###### Fedora ######
