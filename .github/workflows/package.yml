@@ -97,13 +97,20 @@ jobs:
             SUITE=${{ matrix.os.codename }}
             REPOSITORY="${{ github.server_url }}/${{ env.REPOSITORY }}"
 
+      - name: 🐳 Set up Docker metadata for Debian Buster armv6 image
+        if: ${{ matrix.os.codename == 'buster' }}
+        id: docker_metadata_buster_armv6
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ env.REPOSITORY }}/${{ matrix.os.distribution }}
+          tags: |
+            type=sha,format=long,prefix=sha256:
+
       - name: 🐳 Set up, 👷 Build, 🔀 Combine and 🚀 Push Debian Buster armv6 image
         if: ${{ matrix.os.codename == 'buster' }}
         run: |
-          docker buildx build --provenance=false --push --tag ghcr.io/${{ env.REPOSITORY }}/${{ matrix.os.distribution }}:${{ env.TAG }} --platform linux/arm/v5 --file ${{ env.TAG }} .
-          docker buildx imagetools create -t ghcr.io/${{ env.REPOSITORY }}/${{ matrix.os.distribution }}:${{ matrix.os.codename }} --append ghcr.io/${{ env.REPOSITORY }}/${{ matrix.os.distribution }}:${{ env.TAG }}
-        env:
-          TAG: buster-armv6
+          docker buildx build --provenance=false --push --tag ghcr.io/${{ env.REPOSITORY }}/${{ matrix.os.distribution }}:${{ steps.docker_metadata.outputs.tags }} --platform linux/arm/v5 --file buster-armv6 .
+          docker buildx imagetools create -t ghcr.io/${{ env.REPOSITORY }}/${{ matrix.os.distribution }}:${{ matrix.os.codename }} --append ghcr.io/${{ env.REPOSITORY }}/${{ matrix.os.distribution }}:${{ steps.docker_metadata.outputs.tags }}
 
 ####################
 ###### Fedora ######
