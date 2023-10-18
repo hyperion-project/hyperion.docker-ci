@@ -3,7 +3,7 @@ run-name: ${{ github.event_name == 'schedule' && '⏰ Scheduled build' || github
 
 on:
   schedule:
-    - cron: '0 0 * * *'
+    - cron: '0 0 * * 0'
   push:
     branches: [ main ]
 
@@ -25,26 +25,25 @@ jobs:
 
       matrix:
         os: [
-          # { distribution: ubuntu, codename: focal,    description: Ubuntu 20.04 (Focal Fossa)     },
-          # { distribution: ubuntu, codename: jammy,    description: Ubuntu 22.04 (Jammy Jellyfish) },
-          # { distribution: ubuntu, codename: lunar,    description: Ubuntu 23.04 (Lunar Lobster)   },
-          # { distribution: ubuntu, codename: mantic,   description: Ubuntu 23.10 (Mantic Minotaur) },
-          { distribution: debian, codename: buster, description: Debian 10.x (Buster) }
-          # { distribution: debian, codename: bullseye, description: Debian 11.x (Bullseye)         },
-          # { distribution: debian, codename: bookworm, description: Debian 12.x (Bookworm)         },
-          # { distribution: debian, codename: trixie,   description: Debian 13.x (Trixie)           }
+          { distribution: ubuntu, codename: focal,    description: Ubuntu 20.04 (Focal Fossa)     },
+          { distribution: ubuntu, codename: jammy,    description: Ubuntu 22.04 (Jammy Jellyfish) },
+          { distribution: ubuntu, codename: lunar,    description: Ubuntu 23.04 (Lunar Lobster)   },
+          { distribution: ubuntu, codename: mantic,   description: Ubuntu 23.10 (Mantic Minotaur) },
+          { distribution: debian, codename: buster,   description: Debian 10.x (Buster)           }
+          { distribution: debian, codename: bullseye, description: Debian 11.x (Bullseye)         },
+          { distribution: debian, codename: bookworm, description: Debian 12.x (Bookworm)         },
+          { distribution: debian, codename: trixie,   description: Debian 13.x (Trixie)           }
         ]
         include:
           # declare the following target_platform for all matrix jobs
-          # - target_platform: linux/amd64,linux/arm64,linux/arm/v7
-          - target_platform: linux/amd64
-          # overwrite target_platform for the following matrix jobs (include armv5)
-          # - os: { distribution: debian, codename: bullseye }
-          #   target_platform: linux/amd64,linux/arm64,linux/arm/v5,linux/arm/v7
-          # - os: { distribution: debian, codename: bookworm }
-          #   target_platform: linux/amd64,linux/arm64,linux/arm/v5,linux/arm/v7
-          # - os: { distribution: debian, codename: trixie }
-          #   target_platform: linux/amd64,linux/arm64,linux/arm/v5,linux/arm/v7
+          - target_platform: linux/amd64,linux/arm64,linux/arm/v7
+          # overwrite target_platform for the following matrix jobs (include linux/arm/v5)
+          - os: { distribution: debian, codename: bullseye }
+            target_platform: linux/amd64,linux/arm64,linux/arm/v5,linux/arm/v7
+          - os: { distribution: debian, codename: bookworm }
+            target_platform: linux/amd64,linux/arm64,linux/arm/v5,linux/arm/v7
+          - os: { distribution: debian, codename: trixie }
+            target_platform: linux/amd64,linux/arm64,linux/arm/v5,linux/arm/v7
 
     steps:
       - name: 👀 Checkout
@@ -84,7 +83,7 @@ jobs:
             org.opencontainers.image.documentation=https://docs.hyperion-project.org/
             org.opencontainers.image.licenses=MIT
 
-      - name: 👷 Build amd64
+      - name: 👷 Build and 🚀 Push to GitHub Container/Package Registry
         uses: docker/build-push-action@v5
         with:
           context: .
@@ -99,24 +98,32 @@ jobs:
             SUITE=${{ matrix.os.codename }}
             REPOSITORY="${{ github.server_url }}/${{ env.REPOSITORY }}"
 
-      - name: Build armv6l
+      - name: 🐳 Set up Docker metadata for Debian Buster (armv5)
+        if: ${{ matrix.os.codename == 'buster' }}
+        id: docker_metadata_buster_armv5
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ env.REPOSITORY }}/${{ matrix.os.distribution }}
+          tags: type=sha,format=long
+
+      - name: 👷 Build and 🚀 Push (Debian Buster armv5) to GitHub Container/Package Registry
         if: ${{ matrix.os.codename == 'buster' }}
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: armv6l
+          file: buster_armv5
           push: true
           platforms: linux/arm/v5
           provenance: false
-          tags: ghcr.io/${{ env.REPOSITORY }}/${{ matrix.os.distribution }}:armv6l
+          tags: ${{ steps.docker_metadata_buster_armv5.outputs.tags }}
           labels: ${{ steps.docker_metadata.outputs.labels }}
           build-args: |
             SUITE=${{ matrix.os.codename }}
             REPOSITORY="${{ github.server_url }}/${{ env.REPOSITORY }}"
 
-      - name: Combine build images
+      - name: 🔀 Combine Debian Buster images
         if: ${{ matrix.os.codename == 'buster' }}
-        run: docker buildx imagetools create -t ghcr.io/${{ env.REPOSITORY }}/${{ matrix.os.distribution }}:${{ matrix.os.codename }} --append ghcr.io/${{ env.REPOSITORY }}/${{ matrix.os.distribution }}:armv6l
+        run: docker buildx imagetools create -t ghcr.io/${{ env.REPOSITORY }}/${{ matrix.os.distribution }}:${{ matrix.os.codename }} --append ghcr.io/${{ env.REPOSITORY }}/${{ matrix.os.distribution }}:${{ steps.docker_metadata_buster_armv5.outputs.tags }}
 
 ####################
 ###### Fedora ######
