@@ -82,20 +82,20 @@ jobs:
             org.opencontainers.image.documentation=https://docs.hyperion-project.org/
             org.opencontainers.image.licenses=MIT
 
-      - name: 👷 Build and 🚀 Push to GitHub Container/Package Registry
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          file: ubuntu_debian
-          push: true
-          platforms: ${{ matrix.target_platform }}
-          provenance: false
-          tags: ${{ steps.docker_metadata.outputs.tags }}
-          labels: ${{ steps.docker_metadata.outputs.labels }}
-          build-args: |
-            DIST=${{ matrix.os.distribution }}
-            SUITE=${{ matrix.os.codename }}
-            REPOSITORY="${{ github.server_url }}/${{ env.REPOSITORY }}"
+      # - name: 👷 Build and 🚀 Push to GitHub Container/Package Registry
+      #   uses: docker/build-push-action@v5
+      #   with:
+      #     context: .
+      #     file: ubuntu_debian
+      #     push: true
+      #     platforms: ${{ matrix.target_platform }}
+      #     provenance: false
+      #     tags: ${{ steps.docker_metadata.outputs.tags }}
+      #     labels: ${{ steps.docker_metadata.outputs.labels }}
+      #     build-args: |
+      #       DIST=${{ matrix.os.distribution }}
+      #       SUITE=${{ matrix.os.codename }}
+      #       REPOSITORY="${{ github.server_url }}/${{ env.REPOSITORY }}"
 
       - name: 🐳 Set up Docker metadata for Debian Buster armv6 image
         if: ${{ matrix.os.codename == 'buster' }}
@@ -104,7 +104,7 @@ jobs:
         with:
           images: ghcr.io/${{ env.REPOSITORY }}/${{ matrix.os.distribution }}
           tags: |
-            type=sha,format=long,prefix=sha256:
+            type=sha,format=long,prefix=
           labels: ${{ steps.docker_metadata.outputs.labels }}
 
       - name: 🐳 Set up, 👷 Build, 🔀 Combine and 🚀 Push Debian Buster armv6 image
