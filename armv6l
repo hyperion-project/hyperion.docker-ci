@@ -1,0 +1,41 @@
+ARG SUITE="buster"
+ARG REPOSITORY="https://github.com/hyperion-project"
+FROM balenalib/raspberry-pi:${SUITE}-build
+ARG SUITE
+ARG REPOSITORY
+
+LABEL maintainer="Hyperion Project <admin@hyperion-project.org>" \
+	org.opencontainers.image.title="armv6l" \
+	org.opencontainers.image.description="Compile Hyperion for Debian ${SUITE} (Raspberry Pi v1 & ZERO)" \
+	org.opencontainers.image.url="${REPOSITORY}" \
+	org.opencontainers.image.source="${REPOSITORY}/hyperion.docker-ci" \
+	org.opencontainers.image.vendor="Hyperion Project"
+
+# install deps
+RUN install_packages \
+	git \
+	python3-dev \
+	qtbase5-dev \
+	libqt5serialport5-dev \
+	libqt5sql5-sqlite \
+	libqt5svg5-dev \
+	build-essential \
+	libusb-1.0-0-dev \
+	libcec-dev \
+	libavahi-core-dev \
+	libavahi-compat-libdnssd-dev \
+	zlib1g-dev \
+	libraspberrypi-dev \
+	libssl1.0-dev \
+	libasound2-dev \
+	libjpeg-dev \
+	libturbojpeg0-dev \
+	libftdi1-dev && \
+	if [ "$SUITE" = "buster" ]; then \
+		apt-get update && apt-get install -y cmake=3.13.4-1 cmake-data=3.13.4-1; \
+	else \
+		install_packages cmake; \
+	fi && \
+	apt-get clean -q -y && \
+	apt-get autoremove -y && \
+	rm -rf /var/lib/apt/lists/*
