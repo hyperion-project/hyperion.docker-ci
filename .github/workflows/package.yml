@@ -100,7 +100,7 @@ jobs:
       - name: 🐳 Set up, 👷 Build, 🔀 Combine and 🚀 Push Debian Buster armv6 image
         if: ${{ matrix.os.codename == 'buster' }}
         run: |
-          docker buildx build --push --tag ghcr.io/${{ env.REPOSITORY }}/${{ matrix.os.distribution }}:${{ env.TAG }} --platform linux/arm/v5 --file ${{ env.TAG }} .
+          docker buildx build --provenance=false --push --tag ghcr.io/${{ env.REPOSITORY }}/${{ matrix.os.distribution }}:${{ env.TAG }} --platform linux/arm/v5 --file ${{ env.TAG }} .
           docker buildx imagetools create -t ghcr.io/${{ env.REPOSITORY }}/${{ matrix.os.distribution }}:${{ matrix.os.codename }} --append ghcr.io/${{ env.REPOSITORY }}/${{ matrix.os.distribution }}:${{ env.TAG }}
         env:
           TAG: buster-armv6
