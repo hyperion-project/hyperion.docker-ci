@@ -5,11 +5,11 @@ on:
   schedule:
     - cron: '0 0 * * 0'
   push:
-    branches: [ main ]
+    branches: [ master ]
 
 env:
   SECRET_DOCKER_CI: ${{ secrets.DOCKER_CI }}
-  REPOSITORY: paulchen-panther #hyperion-project
+  REPOSITORY: hyperion-project
 
 jobs:
 
@@ -34,7 +34,6 @@ jobs:
           { distribution: debian, codename: trixie,   description: Debian 13.x (Trixie)           }
         ]
         include:
-          # declare the following target_platform for all matrix jobs
           # declare the following target_platform for all matrix jobs
           - target_platform: linux/amd64,linux/arm64,linux/arm/v7
           # overwrite target_platform for the following matrix jobs (include linux/arm/v5)
