@@ -20,6 +20,7 @@ LABEL maintainer="Hyperion Project <admin@hyperion-project.org>" \
 RUN install_packages \
 	git \
 	cmake=3.13.4-1 \
+	cmake-data=3.13.4-1 \
 	python3-dev \
 	qtbase5-dev \
 	libqt5serialport5-dev \
