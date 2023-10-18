@@ -103,8 +103,7 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: ghcr.io/${{ env.REPOSITORY }}/${{ matrix.os.distribution }}
-          tags: |
-            type=sha,format=long,prefix=
+          tags: 'type=sha,format=long,prefix=sha256:'
           labels: ${{ steps.docker_metadata.outputs.labels }}
 
       - name: 🐳 Set up, 👷 Build, 🔀 Combine and 🚀 Push Debian Buster armv6 image
