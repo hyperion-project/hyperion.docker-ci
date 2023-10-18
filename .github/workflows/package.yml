@@ -109,8 +109,8 @@ jobs:
       - name: 🐳 Set up, 👷 Build, 🔀 Combine and 🚀 Push Debian Buster armv6 image
         if: ${{ matrix.os.codename == 'buster' }}
         run: |
-          docker buildx build --provenance=false --push --tag ghcr.io/${{ env.REPOSITORY }}/${{ matrix.os.distribution }}:${{ steps.docker_metadata.outputs.tags }} --platform linux/arm/v5 --file buster-armv6 .
-          docker buildx imagetools create -t ghcr.io/${{ env.REPOSITORY }}/${{ matrix.os.distribution }}:${{ matrix.os.codename }} --append ghcr.io/${{ env.REPOSITORY }}/${{ matrix.os.distribution }}:${{ steps.docker_metadata.outputs.tags }}
+          docker buildx build --provenance=false --push --tag ${{ steps.docker_metadata_buster_armv6.outputs.tags }} --platform linux/arm/v5 --file buster-armv6 .
+          docker buildx imagetools create -t ${{ steps.docker_metadata.outputs.tags }} --append ${{ steps.docker_metadata_buster_armv6.outputs.tags }}
 
 ####################
 ###### Fedora ######
