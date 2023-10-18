@@ -35,8 +35,9 @@ RUN install_packages \
 	libasound2-dev \
 	libjpeg-dev \
 	libturbojpeg0-dev \
-	libftdi1-dev && \
-	cmake=3.13.4-1 && \
+	libftdi1-dev \
+	cmake=3.13.4-1 \
+	cmake-data=3.13.4-1 && \
 	apt-get clean -q -y && \
 	apt-get autoremove -y && \
 	rm -rf /var/lib/apt/lists/*
