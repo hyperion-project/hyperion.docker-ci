@@ -1,12 +1,11 @@
-ARG SUITE="buster"
 ARG REPOSITORY="https://github.com/hyperion-project"
-FROM balenalib/raspberry-pi:${SUITE}-build
+FROM balenalib/raspberry-pi:buster-build
 ARG SUITE
 ARG REPOSITORY
 
 LABEL maintainer="Hyperion Project <admin@hyperion-project.org>" \
 	org.opencontainers.image.title="armv6l" \
-	org.opencontainers.image.description="Compile Hyperion for Debian ${SUITE} (Raspberry Pi v1 & ZERO)" \
+	org.opencontainers.image.description="Compile Hyperion for Debian Buster (Raspberry Pi v1 & ZERO)" \
 	org.opencontainers.image.url="${REPOSITORY}" \
 	org.opencontainers.image.source="${REPOSITORY}/hyperion.docker-ci" \
 	org.opencontainers.image.vendor="Hyperion Project"
@@ -31,11 +30,7 @@ RUN install_packages \
 	libjpeg-dev \
 	libturbojpeg0-dev \
 	libftdi1-dev && \
-	if [ "$SUITE" = "buster" ]; then \
-		apt-get update && apt-get install -y cmake=3.13.4-1 cmake-data=3.13.4-1; \
-	else \
-		install_packages cmake; \
-	fi && \
+	cmake=3.13.4-1 && \
 	apt-get clean -q -y && \
 	apt-get autoremove -y && \
 	rm -rf /var/lib/apt/lists/*
