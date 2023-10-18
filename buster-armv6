@@ -19,6 +19,7 @@ LABEL maintainer="Hyperion Project <admin@hyperion-project.org>" \
 # install deps
 RUN install_packages \
 	git \
+	cmake=3.13.4-1 \
 	python3-dev \
 	qtbase5-dev \
 	libqt5serialport5-dev \
@@ -36,7 +37,6 @@ RUN install_packages \
 	libjpeg-dev \
 	libturbojpeg0-dev \
 	libftdi1-dev && \
-	cmake=3.13.4-1 && \
 	apt-get clean -q -y && \
 	apt-get autoremove -y && \
 	rm -rf /var/lib/apt/lists/*
