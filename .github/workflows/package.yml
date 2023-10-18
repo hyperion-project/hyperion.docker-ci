@@ -76,7 +76,7 @@ jobs:
             maintainer=Hyperion Project <admin@hyperion-project.org>
             org.opencontainers.image.vendor=Hyperion Project
             org.opencontainers.image.title=${{ matrix.os.description }}
-            org.opencontainers.image.description=Compilation environment to build the DEB packages for the APT Repository
+            org.opencontainers.image.description=Compilation environment to build Hyperion for ${{ matrix.os.distribution }} ${{ matrix.os.codename }}
             org.opencontainers.image.url=${{ github.server_url }}
             org.opencontainers.image.source=${{ github.server_url }}/hyperion.docker-ci
             org.opencontainers.image.documentation=https://docs.hyperion-project.org/
@@ -105,6 +105,7 @@ jobs:
           images: ghcr.io/${{ env.REPOSITORY }}/${{ matrix.os.distribution }}
           tags: |
             type=sha,format=long,prefix=sha256:
+          labels: ${{ steps.docker_metadata.outputs.labels }}
 
       - name: 🐳 Set up, 👷 Build, 🔀 Combine and 🚀 Push Debian Buster armv6 image
         if: ${{ matrix.os.codename == 'buster' }}
