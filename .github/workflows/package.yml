@@ -89,7 +89,7 @@ jobs:
         with:
           context: .
           file: ubuntu_debian
-          push: false
+          push: true
           platforms: ${{ matrix.target_platform }}
           provenance: false
           tags: ${{ steps.docker_metadata.outputs.tags }}
@@ -105,7 +105,7 @@ jobs:
         with:
           context: .
           file: armv6l
-          push: false
+          push: true
           platforms: linux/arm/v5
           provenance: false
           tags: ghcr.io/${{ env.REPOSITORY }}/${{ matrix.os.distribution }}:armv6l
