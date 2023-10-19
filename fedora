@@ -1,25 +1,44 @@
 ARG DIST="fedora"
-ARG SUITE="36"
+ARG SUITE="37"
+ARG QT_VERSION="5"
 ARG REPOSITORY="https://github.com/hyperion-project"
 
 FROM ${DIST}:${SUITE}
 
 ARG DIST
 ARG SUITE
+ARG QT_VERSION
 ARG REPOSITORY
 ARG TARGETPLATFORM
 
-# install deps
-RUN dnf -y update && \
-    dnf -y groupinstall 'Development Tools' 'C Development Tools and Libraries' 'RPM Development Tools' && \
-    dnf -y install \
+LABEL maintainer="Hyperion Project <admin@hyperion-project.org>" \
+	org.opencontainers.image.title="${DIST} ${SUITE} ${TARGETPLATFORM} - QT ${QT_VERSION}" \
+	org.opencontainers.image.description="Compilation environment to build Hyperion for ${DIST} ${SUITE}" \
+	org.opencontainers.image.url="${REPOSITORY}" \
+	org.opencontainers.image.source="${REPOSITORY}/hyperion.docker-ci" \
+	org.opencontainers.image.vendor="Hyperion Project" \
+    org.opencontainers.image.documentation="https://docs.hyperion-project.org" \
+    org.opencontainers.image.licenses="MIT"
+
+ENV DNF_INSTALL="dnf -y install"
+
+# update
+RUN dnf -y update
+
+# install qt5 or qt6
+RUN if [ "$QT_VERSION" = "6" ]; then \
+    $DNF_INSTALL qt6-base-dev qt6-qtserialport-devel; \
+else \
+    $DNF_INSTALL qt5-qtbase-devel qt5-qtserialport-devel qt5-qtx11extras-devel; \
+fi
+
+# install general deps
+RUN dnf -y groupinstall 'Development Tools' 'C Development Tools and Libraries' 'RPM Development Tools' && \
+    $DNF_INSTALL \
     fedora-packager \
     python3-devel \
-    qt5-qtbase-devel \
-    qt5-qtserialport-devel \
     libXrandr-devel \
     xcb-util-image-devel \
-    qt5-qtx11extras-devel \
     turbojpeg-devel \
     libjpeg-turbo-devel \
     libusb1-devel \
