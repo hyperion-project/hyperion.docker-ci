@@ -55,6 +55,8 @@ RUN $APT_INSTALL \
     build-essential \
     libusb-1.0-0-dev \
     libcec-dev \
+    libp8-platform-dev \
+    libudev-dev \
     libavahi-core-dev \
     libavahi-compat-libdnssd-dev \
     zlib1g-dev \
