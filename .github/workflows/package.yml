@@ -1,5 +1,8 @@
 name: Package Repository
-run-name: ${{ github.event_name == 'schedule' && '⏰ Scheduled build' || github.event.head_commit.message }}
+run-name: |
+  ${{ github.event_name == 'schedule' && '⏰ Scheduled build' || '' }}
+  ${{ github.event_name == 'push' && '🌱 Push Build -' || '' }}
+  ${{ github.event_name == 'push' && github.event.head_commit.message || '' }}
 
 on:
   schedule:
@@ -18,7 +21,7 @@ jobs:
 #############################
 
   ubuntu_debian:
-    name: ${{ matrix.os.description }}
+    name: 🐧 ${{ matrix.os.description }} Qt ${{ matrix.qt_version }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -33,6 +36,7 @@ jobs:
           { distribution: debian, codename: bookworm, description: Debian 12.x (Bookworm)         },
           { distribution: debian, codename: trixie,   description: Debian 13.x (Trixie)           }
         ]
+        qt_version: [ '5', '6' ]
         include:
           # declare the following target_platform for all matrix jobs
           - target_platform: linux/amd64,linux/arm64,linux/arm/v7
@@ -43,6 +47,12 @@ jobs:
             target_platform: linux/amd64,linux/arm64,linux/arm/v5,linux/arm/v7
           - os: { distribution: debian, codename: trixie }
             target_platform: linux/amd64,linux/arm64,linux/arm/v5,linux/arm/v7
+        exclude:
+          # qt6 is not available on ubuntu focal and debian buster
+          - os: { distribution: ubuntu, codename: focal }
+            qt_version: '6'
+          - os: { distribution: debian, codename: buster }
+            qt_version: '6'
 
     steps:
       - name: 👀 Checkout
@@ -71,11 +81,13 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: ghcr.io/${{ env.REPOSITORY }}/${{ matrix.os.distribution }}
-          tags: ${{ matrix.os.codename }}
+          tags: |
+            type=raw,value=${{ matrix.os.codename }},enable=${{ matrix.qt_version == '5' }}
+            type=raw,value=${{ matrix.os.codename }}-qt6,enable=${{ matrix.qt_version == '6' }}
           labels: |
             maintainer=Hyperion Project <admin@hyperion-project.org>
             org.opencontainers.image.vendor=Hyperion Project
-            org.opencontainers.image.title=${{ matrix.os.description }}
+            org.opencontainers.image.title=${{ matrix.os.description }}  - QT ${{ matrix.qt_version }}
             org.opencontainers.image.description=Compilation environment to build Hyperion for ${{ matrix.os.distribution }} ${{ matrix.os.codename }}
             org.opencontainers.image.url=${{ github.server_url }}
             org.opencontainers.image.source=${{ github.server_url }}/hyperion.docker-ci
@@ -95,30 +107,49 @@ jobs:
           build-args: |
             DIST=${{ matrix.os.distribution }}
             SUITE=${{ matrix.os.codename }}
+            QT_VERSION=${{ matrix.qt_version }}
             REPOSITORY="${{ github.server_url }}/${{ env.REPOSITORY }}"
 
-      - name: 🐳 Set up, 👷 Build, 🔀 Combine and 🚀 Push Debian Buster armv6 image
+  debian_buster_armv6:
+    name: 🐧 Debian 10.x (Buster) (armv6) Qt 5
+    needs: [ ubuntu_debian ]
+    runs-on: ubuntu-latest
+    steps:
+      - name: 👀 Checkout
+        uses: actions/checkout@v4
+
+      - name: ✅ Determine current Repository
+        if: ${{ !startsWith(github.repository, env.REPOSITORY) }}
+        run: echo "REPOSITORY=$(echo '${{ github.actor }}' | tr '[:upper:]' '[:lower:]')" >> ${GITHUB_ENV}
+
+      - name: 🛠️ Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: 🐳 Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: 👷 Build, 🔀 Combine and 🚀 Push Debian Buster armv6 image
         if: ${{ matrix.os.codename == 'buster' }}
         run: |
-          docker buildx build --provenance=false --push --tag ghcr.io/${{ env.REPOSITORY }}/${{ matrix.os.distribution }}:${{ env.FILE_TAG }} --platform linux/arm/v5 --file ${{ env.FILE_TAG }} .
-          docker buildx imagetools create -t ${{ steps.docker_metadata.outputs.tags }} --append ghcr.io/${{ env.REPOSITORY }}/${{ matrix.os.distribution }}:${{ env.FILE_TAG }}
-        env:
-          FILE_TAG: buster-armv6
+          echo ${{ secrets.DOCKER_CI }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+          docker buildx build --provenance=false --push --tag ghcr.io/${{ env.REPOSITORY }}/debian:buster-armv6 --platform linux/arm/v5 --file buster-armv6 .
+          docker buildx imagetools create -t ghcr.io/${{ env.REPOSITORY }}/debian:buster --append ghcr.io/${{ env.REPOSITORY }}/debian:buster-armv6
 
 ####################
 ###### Fedora ######
 ####################
 
   fedora:
-    name: ${{ matrix.description }} ${{ matrix.tag }}
+    name: 🐧 ${{ matrix.description }} ${{ matrix.tag }}  Qt ${{ matrix.qt_version }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
         tag: [ 37, 38, 39, 40 ]
+        qt_version: [ '5', '6' ]
         include:
           - dist: fedora
-          - description: 🐧 Fedora
+          - description: Fedora
           - target_platform: linux/amd64, linux/arm64
 
     steps:
@@ -148,12 +179,14 @@ jobs:
         uses: docker/metadata-action@v4
         with:
           images: ghcr.io/${{ env.REPOSITORY }}/${{ matrix.dist }}
-          tags: ${{ matrix.tag }}
+          tags: |
+            type=raw,value=${{ matrix.tag }},enable=${{ matrix.qt_version == '5' }}
+            type=raw,value=${{ matrix.tag }}-qt6,enable=${{ matrix.qt_version == '6' }}
           labels: |
             maintainer=Hyperion Project <admin@hyperion-project.org>
             org.opencontainers.image.vendor=Hyperion Project
-            org.opencontainers.image.title=${{ matrix.description }}
-            org.opencontainers.image.description=Compilation environment to build the RPM packages for the DNF Repository
+            org.opencontainers.image.title=${{ matrix.description }}  - QT ${{ matrix.qt_version }}
+            org.opencontainers.image.description=Compilation environment to build Hyperion for ${{ matrix.description }} ${{ matrix.tag }}
             org.opencontainers.image.url=${{ github.server_url }}
             org.opencontainers.image.source=${{ github.server_url }}/hyperion.docker-ci
             org.opencontainers.image.documentation=https://docs.hyperion-project.org/
@@ -172,4 +205,5 @@ jobs:
           build-args: |
             DIST=${{ matrix.dist }}
             SUITE=${{ matrix.tag }}
+            QT_VERSION=${{ matrix.qt_version }}
             REPOSITORY="${{ github.server_url }}/${{ env.REPOSITORY }}"

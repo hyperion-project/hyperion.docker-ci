@@ -1,16 +1,18 @@
 ARG DIST="debian"
 ARG SUITE="buster"
+ARG QT_VERSION="5"
 ARG REPOSITORY="https://github.com/hyperion-project"
 
 FROM ${DIST}:${SUITE}
 
 ARG DIST
 ARG SUITE
+ARG QT_VERSION
 ARG REPOSITORY
 ARG TARGETPLATFORM
 
 LABEL maintainer="Hyperion Project <admin@hyperion-project.org>" \
-	org.opencontainers.image.title="${DIST} ${SUITE} ${TARGETPLATFORM}" \
+	org.opencontainers.image.title="${DIST} ${SUITE} ${TARGETPLATFORM} - QT ${QT_VERSION}" \
 	org.opencontainers.image.description="Compilation environment to build Hyperion for ${DIST} ${SUITE}" \
 	org.opencontainers.image.url="${REPOSITORY}" \
 	org.opencontainers.image.source="${REPOSITORY}/hyperion.docker-ci" \
@@ -25,22 +27,36 @@ ENV APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=DontWarn
 ENV APT_INSTALL="apt-get -y install --no-install-recommends"
 ENV APT_UPDATE="apt-get -y update"
 
-# install general deps (all platforms/arch/os)
 ARG DEBIAN_FRONTEND=noninteractive
-RUN $APT_UPDATE && $APT_INSTALL \
+
+# update
+RUN $APT_UPDATE
+
+# install qt5 or qt6 (qt6 is not available on ubuntu focal and debian buster)
+# on debian bullseye add backports to install qt6
+RUN if [ "$SUITE" != "buster" ] && [ "$SUITE" != "focal" ] && [ "$QT_VERSION" = "6" ]; then \
+    if [ "$SUITE" = "bullseye" ]; then \
+        echo "deb http://deb.debian.org/debian bullseye-backports main contrib non-free" | tee -a /etc/apt/sources.list; \
+        $APT_UPDATE; \
+    fi; \
+    $APT_INSTALL qt6-base-dev libqt6serialport6-dev libxkbcommon-dev libvulkan-dev libgl1-mesa-dev; \
+else \
+    $APT_INSTALL qtbase5-dev libqt5serialport5-dev libqt5sql5-sqlite libqt5svg5-dev; \
+fi
+
+# install general deps (all platforms/arch/os)
+RUN $APT_INSTALL \
     devscripts \
     fakeroot \
     debhelper \
     libdistro-info-perl \
     git \
     python3-dev \
-    qtbase5-dev \
-    libqt5serialport5-dev \
-    libqt5sql5-sqlite \
-    libqt5svg5-dev \
     build-essential \
     libusb-1.0-0-dev \
     libcec-dev \
+    libp8-platform-dev \
+    libudev-dev \
     libavahi-core-dev \
     libavahi-compat-libdnssd-dev \
     zlib1g-dev \
@@ -57,9 +73,9 @@ RUN if [ "$TARGETPLATFORM" = "linux/arm/v7" ]; then \
     if [ "$SUITE" = "buster" ]; then \
         $APT_INSTALL cmake=3.13.4-1 cmake-data=3.13.4-1; \
     elif [ "$SUITE" = "focal" ]; then \
-        echo "deb [arch=armhf] http://ports.ubuntu.com/ bionic main restricted" > /etc/apt/sources.list.d/groovy-sources.list; \
+        echo "deb [arch=armhf] http://ports.ubuntu.com/ bionic main restricted" > /etc/apt/sources.list.d/bionic-sources.list; \
         $APT_UPDATE && $APT_INSTALL -t bionic cmake; \
-        rm /etc/apt/sources.list.d/groovy-sources.list; \
+        rm /etc/apt/sources.list.d/bionic-sources.list; \
     else \
         $APT_INSTALL cmake; \
     fi; \
@@ -70,6 +86,9 @@ fi
 # install X11/XCB on Ubuntu for all arch and on Debian for amd64
 # install libraspberrypi-dev on Debian for arm64/armhf
 RUN if [ "$DIST" = "ubuntu" ] || [ "$TARGETPLATFORM" = "linux/amd64" ]; then \
+    if [ "$QT_VERSION" = "5" ]; then \
+        $APT_INSTALL libqt5x11extras5-dev; \
+    fi; \
     $APT_INSTALL libqt5x11extras5-dev libxcb-util0-dev libxcb-randr0-dev libxcb-shm0-dev libxcb-render0-dev libxcb-image0-dev libxrandr-dev libxrender-dev; \
 elif [ "$TARGETPLATFORM" = "linux/arm64" ] || [ "$TARGETPLATFORM" = "linux/arm/v7" ] && [ "$SUITE" != "trixie" ]; then \
     $APT_INSTALL wget gpg dirmngr gpg-agent; \
