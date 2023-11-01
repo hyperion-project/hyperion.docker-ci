@@ -192,7 +192,7 @@ jobs:
             org.opencontainers.image.licenses=MIT
         
       - name: 👷 Build and 🚀 Push to GitHub Container/Package Registry
-        uses: docker/build-push-action@v4
+        uses: docker/build-push-action@v5
         with:
           context: .
           file: fedora
