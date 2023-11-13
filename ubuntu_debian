@@ -21,6 +21,7 @@ LABEL maintainer="Hyperion Project <admin@hyperion-project.org>" \
     org.opencontainers.image.licenses="MIT"
 
 ENV TARGETPLATFORM=${TARGETPLATFORM:-linux/amd64}
+ENV QEMU_EXECVE=1
 ENV DEBFULLNAME="Hyperion Project"
 ENV DEBEMAIL="admin@hyperion-project.org"
 ENV APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=DontWarn
@@ -51,6 +52,7 @@ RUN $APT_INSTALL \
     debhelper \
     libdistro-info-perl \
     git \
+    curl \
     python3-dev \
     build-essential \
     libusb-1.0-0-dev \
@@ -68,17 +70,17 @@ RUN $APT_INSTALL \
     libssl-dev \
     libglib2.0-dev
 
-# install cmake (incl. fix for armhf Debian Buster/Focal)
-RUN if [ "$TARGETPLATFORM" = "linux/arm/v7" ]; then \
-    if [ "$SUITE" = "buster" ]; then \
-        $APT_INSTALL cmake=3.13.4-1 cmake-data=3.13.4-1; \
-    elif [ "$SUITE" = "focal" ]; then \
-        echo "deb [arch=armhf] http://ports.ubuntu.com/ bionic main restricted" > /etc/apt/sources.list.d/bionic-sources.list; \
-        $APT_UPDATE && $APT_INSTALL -t bionic cmake; \
-        rm /etc/apt/sources.list.d/bionic-sources.list; \
-    else \
-        $APT_INSTALL cmake; \
-    fi; \
+# install cmake
+# - on debian buster from buster-backports
+# - on ubuntu focal (armhf) from ubuntu bionic
+RUN if [ "$SUITE" = "buster" ]; then \
+    echo "deb http://deb.debian.org/debian buster-backports main contrib non-free" > /etc/apt/sources.list.d/buster-backports-sources.list; \
+    $APT_UPDATE && $APT_INSTALL -t buster-backports cmake; \
+    rm /etc/apt/sources.list.d/buster-backports-sources.list; \
+elif [ "$TARGETPLATFORM" = "linux/arm/v7" ] && [ "$SUITE" = "focal" ]; then \
+    echo "deb [arch=armhf] http://ports.ubuntu.com/ bionic main restricted" > /etc/apt/sources.list.d/bionic-sources.list; \
+    $APT_UPDATE && $APT_INSTALL -t bionic cmake; \
+    rm /etc/apt/sources.list.d/bionic-sources.list; \
 else \
     $APT_INSTALL cmake; \
 fi
@@ -89,13 +91,29 @@ RUN if [ "$DIST" = "ubuntu" ] || [ "$TARGETPLATFORM" = "linux/amd64" ]; then \
     if [ "$QT_VERSION" = "5" ]; then \
         $APT_INSTALL libqt5x11extras5-dev; \
     fi; \
-    $APT_INSTALL libqt5x11extras5-dev libxcb-util0-dev libxcb-randr0-dev libxcb-shm0-dev libxcb-render0-dev libxcb-image0-dev libxrandr-dev libxrender-dev; \
+    $APT_INSTALL libxcb-util0-dev libxcb-randr0-dev libxcb-shm0-dev libxcb-render0-dev libxcb-image0-dev libxrandr-dev libxrender-dev; \
 elif [ "$TARGETPLATFORM" = "linux/arm64" ] || [ "$TARGETPLATFORM" = "linux/arm/v7" ] && [ "$SUITE" != "trixie" ]; then \
     $APT_INSTALL wget gpg dirmngr gpg-agent; \
-    echo "deb http://archive.raspberrypi.org/debian ${SUITE} main ui" >>  /etc/apt/sources.list.d/raspi.list; \
-    apt-key adv --batch --keyserver keyserver.ubuntu.com  --recv-key 0x82B129927FA3303E; \
+    echo "deb http://archive.raspberrypi.org/debian ${SUITE} main ui" >> /etc/apt/sources.list.d/raspi.list; \
+    apt-key adv --keyserver keyserver.ubuntu.com  --recv-key 0x82B129927FA3303E; \
     $APT_UPDATE && $APT_INSTALL libraspberrypi-dev; \
+    rm /etc/apt/sources.list.d/raspi.list; \
 fi
+
+# download qemu
+RUN if [ "$TARGETPLATFORM" = "linux/arm64" ]; then \
+    curl -kL https://github.com/balena-io/qemu/releases/download/v7.0.0%2Bbalena1/qemu-7.0.0.balena1-aarch64.tar.gz | tar zxvf - -C . --strip-components 1 && mv qemu-aarch64-static /usr/bin/qemu-static; \
+elif [ "$TARGETPLATFORM" = "linux/arm/v5" ] || [ "$TARGETPLATFORM" = "linux/arm/v7" ]; then \
+    curl -kL https://github.com/balena-io/qemu/releases/download/v7.0.0%2Bbalena1/qemu-7.0.0.balena1-arm.tar.gz | tar zxvf - -C . --strip-components 1 && mv qemu-arm-static /usr/bin/qemu-static; \
+else \
+    printf '#!/bin/bash\nexec "$@"' > /usr/bin/qemu-static; \
+fi
+
+# set qemu exec flag
+RUN chmod +x /usr/bin/qemu-static
 
 # cleanup
 RUN apt-get clean -q -y && apt-get autoremove -y && rm -rf /var/lib/apt/lists/*
+
+# set entrypoint
+ENTRYPOINT [ "/usr/bin/qemu-static" ]

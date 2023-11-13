@@ -20,6 +20,8 @@ LABEL maintainer="Hyperion Project <admin@hyperion-project.org>" \
     org.opencontainers.image.documentation="https://docs.hyperion-project.org" \
     org.opencontainers.image.licenses="MIT"
 
+ENV TARGETPLATFORM=${TARGETPLATFORM:-linux/amd64}
+ENV QEMU_EXECVE=1
 ENV DNF_INSTALL="dnf -y install"
 
 # update
@@ -35,6 +37,7 @@ fi
 # install general deps
 RUN dnf -y groupinstall 'Development Tools' 'C Development Tools and Libraries' 'RPM Development Tools' && \
     $DNF_INSTALL \
+    curl \
     fedora-packager \
     python3-devel \
     libXrandr-devel \
@@ -58,5 +61,18 @@ RUN dnf -y groupinstall 'Development Tools' 'C Development Tools and Libraries' 
 # rpmdev-setuptree will create the ~/rpmbuild directory and a set of subdirectories (e.g. SPECS and BUILD)
 RUN rpmdev-setuptree
 
+# download qemu
+RUN if [ "$TARGETPLATFORM" = "linux/arm64" ]; then \
+    curl -kL https://github.com/balena-io/qemu/releases/download/v7.0.0%2Bbalena1/qemu-7.0.0.balena1-aarch64.tar.gz | tar zxvf - -C . --strip-components 1 && mv qemu-aarch64-static /usr/bin/qemu-static; \
+else \
+    printf '#!/bin/bash\nexec "$@"' > /usr/bin/qemu-static; \
+fi
+
+# set qemu exec flag
+RUN chmod +x /usr/bin/qemu-static
+
 # cleanup
 RUN dnf clean all && rm -rf /var/cache/dnf
+
+# set entrypoint
+ENTRYPOINT [ "/usr/bin/qemu-static" ]

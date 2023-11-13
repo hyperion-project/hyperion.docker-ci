@@ -1,0 +1,76 @@
+ARG SUITE="buster"
+ARG QT_VERSION="5"
+ARG REPOSITORY="https://github.com/hyperion-project"
+
+FROM balenalib/rpi-raspbian:${SUITE}
+
+ARG SUITE
+ARG QT_VERSION
+ARG REPOSITORY
+ARG TARGETPLATFORM
+
+ENV QEMU_EXECVE=1
+ENV APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=DontWarn
+ENV APT_INSTALL="apt-get -y install --no-install-recommends"
+ENV APT_UPDATE="apt-get -y update"
+
+LABEL maintainer="Hyperion Project <admin@hyperion-project.org>" \
+	org.opencontainers.image.title="Debian ${SUITE} ${TARGETPLATFORM} - QT ${QT_VERSION}" \
+	org.opencontainers.image.description="Compilation environment to build Hyperion for Debian ${SUITE}" \
+	org.opencontainers.image.url="${REPOSITORY}" \
+	org.opencontainers.image.source="${REPOSITORY}/hyperion.docker-ci" \
+	org.opencontainers.image.vendor="Hyperion Project" \
+    org.opencontainers.image.documentation="https://docs.hyperion-project.org" \
+    org.opencontainers.image.licenses="MIT"
+
+# update
+RUN $APT_UPDATE
+
+# install qt5 or qt6 (qt6 is not available on debian buster/bullseye)
+RUN if [ "$SUITE" = "bookworm" ] && [ "$QT_VERSION" = "6" ]; then \
+    $APT_INSTALL qt6-base-dev libqt6serialport6-dev libxkbcommon-dev libvulkan-dev libgl1-mesa-dev; \
+else \
+    $APT_INSTALL qtbase5-dev libqt5serialport5-dev libqt5sql5-sqlite libqt5svg5-dev; \
+fi
+
+# install deps
+RUN $APT_INSTALL \
+    devscripts \
+    fakeroot \
+    debhelper \
+    libdistro-info-perl \
+    git \
+    curl \
+    python3-dev \
+    build-essential \
+    libusb-1.0-0-dev \
+    libcec-dev \
+    libp8-platform-dev \
+    libudev-dev \
+    libavahi-core-dev \
+    libavahi-compat-libdnssd-dev \
+    zlib1g-dev \
+    libasound2-dev \
+    libjpeg-dev \
+    libturbojpeg0-dev \
+    libmbedtls-dev \
+    libftdi1-dev \
+    libssl-dev \
+    libraspberrypi-dev \
+    libglib2.0-dev
+
+# downgrade cmake on buster
+RUN if [ "$SUITE" = "buster" ]; then \
+    $APT_UPDATE && $APT_INSTALL  cmake=3.13.4-1 cmake-data=3.13.4-1; \
+else \
+    $APT_INSTALL cmake; \
+fi
+
+# download qemu and set exec flag
+RUN curl -kL https://github.com/balena-io/qemu/releases/download/v7.0.0%2Bbalena1/qemu-7.0.0.balena1-arm.tar.gz | tar zxvf - -C . --strip-components 1 && mv qemu-arm-static /usr/bin/qemu-static && chmod +x /usr/bin/qemu-static
+
+# cleanup
+RUN apt-get clean -q -y && apt-get autoremove -y && rm -rf /var/lib/apt/lists/*
+
+# set entrypoint
+ENTRYPOINT [ "/usr/bin/qemu-static" ]

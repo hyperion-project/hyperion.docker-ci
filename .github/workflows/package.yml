@@ -1,14 +1,18 @@
 name: Package Repository
 run-name: |
   ${{ github.event_name == 'schedule' && '⏰ Scheduled build' || '' }}
-  ${{ github.event_name == 'push' && '🌱 Push Build -' || '' }}
-  ${{ github.event_name == 'push' && github.event.head_commit.message || '' }}
+  ${{ github.event_name == 'push' && format('🌱 Push build - {0}', github.event.head_commit.message) || '' }}
 
 on:
   schedule:
     - cron: '0 0 * * 0'
   push:
     branches: [ master ]
+
+# If pushes to master are made in rapid succession, cancel existing docker builds and use newer commits
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref_name }}
+  cancel-in-progress: true
 
 env:
   SECRET_DOCKER_CI: ${{ secrets.DOCKER_CI }}
@@ -38,15 +42,7 @@ jobs:
         ]
         qt_version: [ '5', '6' ]
         include:
-          # declare the following target_platform for all matrix jobs
           - target_platform: linux/amd64,linux/arm64,linux/arm/v7
-          # overwrite target_platform for the following matrix jobs (include linux/arm/v5)
-          - os: { distribution: debian, codename: bullseye }
-            target_platform: linux/amd64,linux/arm64,linux/arm/v5,linux/arm/v7
-          - os: { distribution: debian, codename: bookworm }
-            target_platform: linux/amd64,linux/arm64,linux/arm/v5,linux/arm/v7
-          - os: { distribution: debian, codename: trixie }
-            target_platform: linux/amd64,linux/arm64,linux/arm/v5,linux/arm/v7
         exclude:
           # qt6 is not available on ubuntu focal and debian buster
           - os: { distribution: ubuntu, codename: focal }
@@ -110,10 +106,26 @@ jobs:
             QT_VERSION=${{ matrix.qt_version }}
             REPOSITORY="${{ github.server_url }}/${{ env.REPOSITORY }}"
 
-  debian_buster_armv6:
-    name: 🐧 Debian 10.x (Buster) (armv6) Qt 5
+  debian_armv6:
+    name: 🐧 ${{ matrix.os.description }} Qt ${{ matrix.qt_version }} (armv6)
     needs: [ ubuntu_debian ]
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [
+          { codename: buster,   description: Debian 10.x (Buster)   },
+          { codename: bullseye, description: Debian 11.x (Bullseye) },
+          { codename: bookworm, description: Debian 12.x (Bookworm) }
+        ]
+        qt_version: [ '5', '6' ]
+        exclude:
+          # qt6 is not available on debian buster/bullseye
+          - os: { codename: buster, description: Debian 10.x (Buster) }
+            qt_version: '6'
+          - os: { codename: bullseye, description: Debian 11.x (Bullseye) }
+            qt_version: '6'
+
     steps:
       - name: 👀 Checkout
         uses: actions/checkout@v4
@@ -128,11 +140,13 @@ jobs:
       - name: 🐳 Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: 👷 Build, 🔀 Combine and 🚀 Push Debian Buster armv6 image
+      - name: 👷 Build, 🔀 Combine and 🚀 Push to GitHub Container/Package Registry
         run: |
           echo ${{ secrets.DOCKER_CI }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-          docker buildx build --provenance=false --push --tag ghcr.io/${{ env.REPOSITORY }}/debian:buster-armv6 --platform linux/arm/v5 --file buster-armv6 .
-          docker buildx imagetools create -t ghcr.io/${{ env.REPOSITORY }}/debian:buster --append ghcr.io/${{ env.REPOSITORY }}/debian:buster-armv6
+          docker buildx build --provenance=false --push --build-arg SUITE=${{ matrix.os.codename }} --build-arg QT_VERSION=${{ matrix.qt_version }} --platform=linux/arm/v5 --tag ghcr.io/${{ env.REPOSITORY }}/debian:${{ env.IMAGE }}-armv6 --file debian-armv6 .
+          docker buildx imagetools create -t ghcr.io/${{ env.REPOSITORY }}/debian:${{ env.IMAGE }} --append ghcr.io/${{ env.REPOSITORY }}/debian:${{ env.IMAGE }}-armv6
+        env:
+          IMAGE: ${{ matrix.qt_version == '6' && format('{0}-qt6', matrix.os.codename) || matrix.os.codename }}
 
 ####################
 ###### Fedora ######
