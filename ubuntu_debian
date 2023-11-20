@@ -40,7 +40,7 @@ RUN if [ "$SUITE" != "buster" ] && [ "$SUITE" != "focal" ] && [ "$QT_VERSION" = 
         echo "deb http://deb.debian.org/debian bullseye-backports main contrib non-free" | tee -a /etc/apt/sources.list; \
         $APT_UPDATE; \
     fi; \
-    $APT_INSTALL qt6-base-dev libqt6serialport6-dev libxkbcommon-dev libvulkan-dev libgl1-mesa-dev; \
+    $APT_INSTALL qt6-base-dev libqt6serialport6-dev libqt6sql6-sqlite libxkbcommon-dev libvulkan-dev libgl1-mesa-dev; \
 else \
     $APT_INSTALL qtbase5-dev libqt5serialport5-dev libqt5sql5-sqlite libqt5svg5-dev; \
 fi
