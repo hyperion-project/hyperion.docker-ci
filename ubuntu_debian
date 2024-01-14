@@ -55,6 +55,7 @@ RUN $APT_INSTALL \
     curl \
     python3-dev \
     build-essential \
+    ninja-build \
     libusb-1.0-0-dev \
     libcec-dev \
     libp8-platform-dev \

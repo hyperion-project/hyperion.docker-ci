@@ -37,6 +37,7 @@ fi
 # install general deps
 RUN dnf -y groupinstall 'Development Tools' 'C Development Tools and Libraries' 'RPM Development Tools' && \
     $DNF_INSTALL \
+    ninja-build \
     curl \
     fedora-packager \
     python3-devel \
