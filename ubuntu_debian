@@ -104,7 +104,7 @@ fi
 # download qemu
 RUN if [ "$TARGETPLATFORM" = "linux/arm64" ]; then \
     curl -kL https://github.com/balena-io/qemu/releases/download/v7.0.0%2Bbalena1/qemu-7.0.0.balena1-aarch64.tar.gz | tar zxvf - -C . --strip-components 1 && mv qemu-aarch64-static /usr/bin/qemu-static; \
-elif [ "$TARGETPLATFORM" = "linux/arm/v5" ] || [ "$TARGETPLATFORM" = "linux/arm/v7" ]; then \
+elif [ "$TARGETPLATFORM" = "linux/arm/v6" ] || [ "$TARGETPLATFORM" = "linux/arm/v7" ]; then \
     curl -kL https://github.com/balena-io/qemu/releases/download/v7.0.0%2Bbalena1/qemu-7.0.0.balena1-arm.tar.gz | tar zxvf - -C . --strip-components 1 && mv qemu-arm-static /usr/bin/qemu-static; \
 else \
     printf '#!/bin/bash\nexec "$@"' > /usr/bin/qemu-static; \
