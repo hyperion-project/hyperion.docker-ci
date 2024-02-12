@@ -60,12 +60,21 @@ RUN $APT_INSTALL \
     libraspberrypi-dev \
     libglib2.0-dev
 
-# downgrade cmake on buster
-RUN if [ "$SUITE" = "buster" ]; then \
-    $APT_UPDATE && $APT_INSTALL  cmake=3.13.4-1 cmake-data=3.13.4-1; \
-else \
-    $APT_INSTALL cmake; \
-fi
+# compile and install cmake
+ENV CMAKE_VERSION="3.28.1"
+ENV CMAKE_URL="https://github.com/Kitware/CMake/releases/download/v${CMAKE_VERSION}/cmake-${CMAKE_VERSION}"
+RUN set -xe \
+    && mkdir -p /tmp/cmake \
+    && cd /tmp/cmake \
+    && curl -kL ${CMAKE_URL}.tar.gz | tar zxf - -C . --strip-components 1 \
+    && ./bootstrap --prefix=/usr/local \
+    && make -j $(nproc) \
+    && make install \
+    && cd \
+    && rm -rf /tmp/cmake
+
+# Show cmake version
+RUN cmake --version 
 
 # download qemu and set exec flag
 RUN curl -kL https://github.com/balena-io/qemu/releases/download/v7.0.0%2Bbalena1/qemu-7.0.0.balena1-arm.tar.gz | tar zxvf - -C . --strip-components 1 && mv qemu-arm-static /usr/bin/qemu-static && chmod +x /usr/bin/qemu-static

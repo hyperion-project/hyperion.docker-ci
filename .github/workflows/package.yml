@@ -73,6 +73,16 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.DOCKER_CI }}
 
+      - name: Cache docker layers
+        uses: actions/cache@v4
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ github.ref }}-${{ github.sha }}
+          restore-keys: |
+            ${{ github.ref }}-${{ github.sha }}
+            ${{ github.ref }}
+            refs/head/main
+
       - name: 🐳 Set up Docker metadata
         id: docker_metadata
         uses: docker/metadata-action@v5
@@ -90,6 +100,8 @@ jobs:
             org.opencontainers.image.source=${{ github.server_url }}/hyperion.docker-ci
             org.opencontainers.image.documentation=https://docs.hyperion-project.org/
             org.opencontainers.image.licenses=MIT
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache
 
       - name: 👷 Build and 🚀 Push to GitHub Container/Package Registry
         uses: docker/build-push-action@v5
@@ -141,10 +153,20 @@ jobs:
       - name: 🐳 Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
+      - name: Cache docker layers
+        uses: actions/cache@v4
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ github.ref }}-${{ github.sha }}
+          restore-keys: |
+            ${{ github.ref }}-${{ github.sha }}
+            ${{ github.ref }}
+            refs/head/main
+
       - name: 👷 Build, 🔀 Combine and 🚀 Push to GitHub Container/Package Registry
         run: |
           echo ${{ secrets.DOCKER_CI }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-          docker buildx build --provenance=false --push --build-arg SUITE=${{ matrix.os.codename }} --build-arg QT_VERSION=${{ matrix.qt_version }} --platform=linux/arm/v6 --tag ghcr.io/${{ env.REPOSITORY }}/debian:${{ env.IMAGE }}-armv6 --file debian-armv6 .
+          docker buildx build --provenance=false --push --cache-to type=local,dest=/tmp/.buildx-cache --cache-from type=local,src=/tmp/.buildx-cache --build-arg SUITE=${{ matrix.os.codename }} --build-arg QT_VERSION=${{ matrix.qt_version }} --platform=linux/arm/v6 --tag ghcr.io/${{ env.REPOSITORY }}/debian:${{ env.IMAGE }}-armv6 --file debian-armv6 .
           docker buildx imagetools create -t ghcr.io/${{ env.REPOSITORY }}/debian:${{ env.IMAGE }} --append ghcr.io/${{ env.REPOSITORY }}/debian:${{ env.IMAGE }}-armv6
         env:
           IMAGE: ${{ matrix.qt_version == '6' && format('{0}-qt6', matrix.os.codename) || matrix.os.codename }}

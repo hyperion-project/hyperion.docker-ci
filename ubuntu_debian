@@ -71,20 +71,32 @@ RUN $APT_INSTALL \
     libssl-dev \
     libglib2.0-dev
 
-# install cmake
-# - on debian buster from buster-backports
-# - on ubuntu focal (armhf) from ubuntu bionic
-RUN if [ "$SUITE" = "buster" ]; then \
-    echo "deb http://deb.debian.org/debian buster-backports main contrib non-free" > /etc/apt/sources.list.d/buster-backports-sources.list; \
-    $APT_UPDATE && $APT_INSTALL -t buster-backports cmake; \
-    rm /etc/apt/sources.list.d/buster-backports-sources.list; \
-elif [ "$TARGETPLATFORM" = "linux/arm/v7" ] && [ "$SUITE" = "focal" ]; then \
-    echo "deb [arch=armhf] http://ports.ubuntu.com/ bionic main restricted" > /etc/apt/sources.list.d/bionic-sources.list; \
-    $APT_UPDATE && $APT_INSTALL -t bionic cmake; \
-    rm /etc/apt/sources.list.d/bionic-sources.list; \
+# Install cmake on amd64 and arm64
+# Compile and install cmake on armv7
+ENV CMAKE_VERSION="3.28.1"
+ENV CMAKE_URL="https://github.com/Kitware/CMake/releases/download/v${CMAKE_VERSION}/cmake-${CMAKE_VERSION}"
+RUN if [ "$TARGETPLATFORM" = "linux/amd64" ]; then \
+    curl -OLs ${CMAKE_URL}-linux-x86_64.sh; \
+    chmod +x cmake-${CMAKE_VERSION}-linux-x86_64.sh; \
+    ./cmake-${CMAKE_VERSION}-linux-x86_64.sh --skip-license --prefix="/usr"; \
+    rm -rf cmake-${CMAKE_VERSION}-linux-x86_64.sh; \
+elif [ "$TARGETPLATFORM" = "linux/arm64" ]; then \
+    curl -OLs ${CMAKE_URL}-linux-aarch64.sh; \
+    chmod +x cmake-${CMAKE_VERSION}-linux-aarch64.sh; \
+    ./cmake-${CMAKE_VERSION}-linux-aarch64.sh --skip-license --prefix="/usr"; \
+    rm -rf cmake-${CMAKE_VERSION}-linux-aarch64.sh; \
 else \
-    $APT_INSTALL cmake; \
+    mkdir -p /tmp/cmake; \
+    cd /tmp/cmake; \
+    curl -kL ${CMAKE_URL}.tar.gz | tar zxf - -C . --strip-components 1; \
+    ./bootstrap --prefix=/usr/local; \
+    make -j $(nproc); \
+    make install; \
+    cd && rm -rf /tmp/cmake; \
 fi
+
+# Show cmake version
+RUN cmake --version 
 
 # install X11/XCB on Ubuntu for all arch and on Debian for amd64
 # install libraspberrypi-dev on Debian for arm64/armhf
