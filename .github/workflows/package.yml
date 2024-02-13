@@ -100,8 +100,6 @@ jobs:
             org.opencontainers.image.source=${{ github.server_url }}/hyperion.docker-ci
             org.opencontainers.image.documentation=https://docs.hyperion-project.org/
             org.opencontainers.image.licenses=MIT
-          cache-from: type=local,src=/tmp/.buildx-cache
-          cache-to: type=local,dest=/tmp/.buildx-cache
 
       - name: 👷 Build and 🚀 Push to GitHub Container/Package Registry
         uses: docker/build-push-action@v5
@@ -118,6 +116,8 @@ jobs:
             SUITE=${{ matrix.os.codename }}
             QT_VERSION=${{ matrix.qt_version }}
             REPOSITORY="${{ github.server_url }}/${{ env.REPOSITORY }}"
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache
 
   debian_armv6:
     name: 🐧 ${{ matrix.os.description }} Qt ${{ matrix.qt_version }} (armv6)
