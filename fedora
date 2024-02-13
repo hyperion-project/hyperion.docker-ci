@@ -59,6 +59,27 @@ RUN dnf -y groupinstall 'Development Tools' 'C Development Tools and Libraries' 
     libcec-devel \
     alsa-lib-devel
 
+# Remove system CMake
+RUN  
+
+# Install CMake on amd64 and arm64
+ENV CMAKE_VERSION="3.28.3"
+ENV CMAKE_URL="https://github.com/Kitware/CMake/releases/download/v${CMAKE_VERSION}/cmake-${CMAKE_VERSION}"
+RUN if [ "$TARGETPLATFORM" = "linux/amd64" ]; then \
+    curl -OLs ${CMAKE_URL}-linux-x86_64.sh; \
+    chmod +x cmake-${CMAKE_VERSION}-linux-x86_64.sh; \
+    ./cmake-${CMAKE_VERSION}-linux-x86_64.sh --skip-license --prefix="/usr"; \
+    rm -rf cmake-${CMAKE_VERSION}-linux-x86_64.sh; \
+elif [ "$TARGETPLATFORM" = "linux/arm64" ]; then \
+    curl -OLs ${CMAKE_URL}-linux-aarch64.sh; \
+    chmod +x cmake-${CMAKE_VERSION}-linux-aarch64.sh; \
+    ./cmake-${CMAKE_VERSION}-linux-aarch64.sh --skip-license --prefix="/usr"; \
+    rm -rf cmake-${CMAKE_VERSION}-linux-aarch64.sh; \
+fi
+
+# Show cmake version
+RUN cmake --version 
+
 # rpmdev-setuptree will create the ~/rpmbuild directory and a set of subdirectories (e.g. SPECS and BUILD)
 RUN rpmdev-setuptree
 

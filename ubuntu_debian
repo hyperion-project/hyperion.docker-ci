@@ -71,9 +71,9 @@ RUN $APT_INSTALL \
     libssl-dev \
     libglib2.0-dev
 
-# Install cmake on amd64 and arm64
-# Compile and install cmake on armv7
-ENV CMAKE_VERSION="3.28.1"
+# Install CMake on amd64 and arm64
+# Compile and install CMake on armv7
+ENV CMAKE_VERSION="3.28.3"
 ENV CMAKE_URL="https://github.com/Kitware/CMake/releases/download/v${CMAKE_VERSION}/cmake-${CMAKE_VERSION}"
 RUN if [ "$TARGETPLATFORM" = "linux/amd64" ]; then \
     curl -OLs ${CMAKE_URL}-linux-x86_64.sh; \
