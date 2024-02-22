@@ -89,7 +89,7 @@ else \
     mkdir -p /tmp/cmake; \
     cd /tmp/cmake; \
     curl -kL ${CMAKE_URL}.tar.gz | tar zxf - -C . --strip-components 1; \
-    ./bootstrap --prefix=/usr/local; \
+    ./bootstrap --prefix=/usr; \
     make -j $(nproc); \
     make install; \
     cd && rm -rf /tmp/cmake; \
