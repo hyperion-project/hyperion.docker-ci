@@ -35,7 +35,7 @@ jobs:
           { distribution: ubuntu, codename: jammy,    description: Ubuntu 22.04 (Jammy Jellyfish) },
           { distribution: ubuntu, codename: lunar,    description: Ubuntu 23.04 (Lunar Lobster)   },
           { distribution: ubuntu, codename: mantic,   description: Ubuntu 23.10 (Mantic Minotaur) },
-          { distribution: ubuntu, codename: noble,    description: Ubuntu 24.04 (Noble Numbat)    },
+          # { distribution: ubuntu, codename: noble,    description: Ubuntu 24.04 (Noble Numbat)    }, # currently broken
           { distribution: debian, codename: buster,   description: Debian 10.x (Buster)           },
           { distribution: debian, codename: bullseye, description: Debian 11.x (Bullseye)         },
           { distribution: debian, codename: bookworm, description: Debian 12.x (Bookworm)         },
