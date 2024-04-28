@@ -39,7 +39,7 @@ jobs:
           { distribution: debian, codename: buster,   description: Debian 10.x (Buster)           },
           { distribution: debian, codename: bullseye, description: Debian 11.x (Bullseye)         },
           { distribution: debian, codename: bookworm, description: Debian 12.x (Bookworm)         },
-          { distribution: debian, codename: trixie,   description: Debian 13.x (Trixie)           }
+          # { distribution: debian, codename: trixie,   description: Debian 13.x (Trixie)           }, # currently broken
         ]
         qt_version: [ '5', '6' ]
         include:
