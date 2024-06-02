@@ -1,5 +1,5 @@
 ARG DIST="fedora"
-ARG SUITE="37"
+ARG SUITE="39"
 ARG QT_VERSION="5"
 ARG REPOSITORY="https://github.com/hyperion-project"
 
