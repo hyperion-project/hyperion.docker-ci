@@ -91,7 +91,7 @@ jobs:
             org.opencontainers.image.licenses=MIT
 
       - name: 👷 Build and 🚀 Push to GitHub Container/Package Registry
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: .
           file: ubuntu_debian
@@ -206,7 +206,7 @@ jobs:
             org.opencontainers.image.licenses=MIT
         
       - name: 👷 Build and 🚀 Push to GitHub Container/Package Registry
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: .
           file: fedora
