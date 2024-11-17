@@ -35,7 +35,7 @@ else \
 fi
 
 # install general deps
-RUN dnf -y groupinstall 'Development Tools' 'C Development Tools and Libraries' 'RPM Development Tools' && \
+RUN dnf -y group install 'development-tools' 'c-development' 'rpm-development-tools' && \
     $DNF_INSTALL \
     ninja-build \
     curl \
