@@ -40,10 +40,11 @@ RUN if [ "$SUITE" != "buster" ] && [ "$SUITE" != "focal" ] && [ "$QT_VERSION" = 
         echo "deb http://deb.debian.org/debian bullseye-backports main contrib non-free" | tee -a /etc/apt/sources.list; \
         $APT_UPDATE; \
     fi; \
-    if [ "$SUITE" = "trixie" ]; then SERIALPORT="qt6-serialport-dev"; else SERIALPORT="libqt6serialport6-dev"; fi; \
-    $APT_INSTALL qt6-base-dev $SERIALPORT libqt6sql6-sqlite libxkbcommon-dev libvulkan-dev libgl1-mesa-dev; \
+    if [ "$SUITE" = "jammy" ]; then SERIALPORT="libqt6serialport6-dev"; else SERIALPORT="qt6-serialport-dev"; fi; \
+    if [ "$SUITE" = "jammy" ]; then WEBSOCKETS="libqt6websockets6-dev"; else WEBSOCKETS="qt6-websockets-dev"; fi; \
+    $APT_INSTALL qt6-base-dev $SERIALPORT $WEBSOCKETS libqt6sql6-sqlite libxkbcommon-dev libvulkan-dev libgl1-mesa-dev; \
 else \
-    $APT_INSTALL qtbase5-dev libqt5serialport5-dev libqt5sql5-sqlite libqt5svg5-dev; \
+    $APT_INSTALL qtbase5-dev libqt5serialport5-dev libqt5websockets5-dev libqt5sql5-sqlite libqt5svg5-dev; \
 fi
 
 # install general deps (all platforms/arch/os)
