@@ -28,9 +28,9 @@ RUN $APT_UPDATE
 
 # install qt5 or qt6 (qt6 is not available on debian buster/bullseye)
 RUN if [ "$SUITE" = "bookworm" ] && [ "$QT_VERSION" = "6" ]; then \
-    $APT_INSTALL qt6-base-dev libqt6serialport6-dev libxkbcommon-dev libvulkan-dev libgl1-mesa-dev; \
+    $APT_INSTALL qt6-base-dev qt6-serialport-dev qt6-websockets-dev libxkbcommon-dev libvulkan-dev libgl1-mesa-dev; \
 else \
-    $APT_INSTALL qtbase5-dev libqt5serialport5-dev libqt5sql5-sqlite libqt5svg5-dev; \
+    $APT_INSTALL qtbase5-dev libqt5serialport5-dev libqt5websockets5-dev libqt5sql5-sqlite libqt5svg5-dev; \
 fi
 
 # install deps
