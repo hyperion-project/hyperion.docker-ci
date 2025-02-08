@@ -2,6 +2,7 @@ ARG DIST="fedora"
 ARG SUITE="39"
 ARG QT_VERSION="5"
 ARG REPOSITORY="https://github.com/hyperion-project"
+ARG CMAKE_VERSION="3.28.3"
 
 FROM ${DIST}:${SUITE}
 
@@ -9,6 +10,7 @@ ARG DIST
 ARG SUITE
 ARG QT_VERSION
 ARG REPOSITORY
+ARG CMAKE_VERSION
 ARG TARGETPLATFORM
 
 LABEL maintainer="Hyperion Project <admin@hyperion-project.org>" \
@@ -21,22 +23,20 @@ LABEL maintainer="Hyperion Project <admin@hyperion-project.org>" \
     org.opencontainers.image.licenses="MIT"
 
 ENV TARGETPLATFORM=${TARGETPLATFORM:-linux/amd64}
-ENV QEMU_EXECVE=1
-ENV DNF_INSTALL="dnf -y install"
 
 # update
 RUN dnf -y update
 
 # install qt5 or qt6
 RUN if [ "$QT_VERSION" = "6" ]; then \
-    $DNF_INSTALL qt6-qtbase-devel qt6-qtserialport-devel qt6-qtwebsockets-devel libxkbcommon-devel; \
+    dnf -y install qt6-qtbase-devel qt6-qtserialport-devel qt6-qtwebsockets-devel libxkbcommon-devel; \
 else \
-    $DNF_INSTALL qt5-qtbase-devel qt5-qtserialport-devel qt5-qtwebsockets-devel qt5-qtx11extras-devel; \
+    dnf -y install qt5-qtbase-devel qt5-qtserialport-devel qt5-qtwebsockets-devel qt5-qtx11extras-devel; \
 fi
 
 # install general deps
 RUN dnf -y group install 'development-tools' 'c-development' 'rpm-development-tools' && \
-    $DNF_INSTALL \
+    dnf -y install \
     ninja-build \
     curl \
     fedora-packager \
@@ -60,11 +60,7 @@ RUN dnf -y group install 'development-tools' 'c-development' 'rpm-development-to
     alsa-lib-devel \
     libftdi-devel
 
-# Remove system CMake
-RUN  
-
 # Install CMake on amd64 and arm64
-ENV CMAKE_VERSION="3.28.3"
 ENV CMAKE_URL="https://github.com/Kitware/CMake/releases/download/v${CMAKE_VERSION}/cmake-${CMAKE_VERSION}"
 RUN if [ "$TARGETPLATFORM" = "linux/amd64" ]; then \
     curl -OLs ${CMAKE_URL}-linux-x86_64.sh; \
@@ -84,18 +80,12 @@ RUN cmake --version
 # rpmdev-setuptree will create the ~/rpmbuild directory and a set of subdirectories (e.g. SPECS and BUILD)
 RUN rpmdev-setuptree
 
-# download qemu
+# download qemu and set exec flag
 RUN if [ "$TARGETPLATFORM" = "linux/arm64" ]; then \
-    curl -kL https://github.com/balena-io/qemu/releases/download/v7.0.0%2Bbalena1/qemu-7.0.0.balena1-aarch64.tar.gz | tar zxvf - -C . --strip-components 1 && mv qemu-aarch64-static /usr/bin/qemu-static; \
+    curl -kL https://github.com/balena-io/qemu/releases/download/v7.0.0%2Bbalena1/qemu-7.0.0.balena1-aarch64.tar.gz | tar zxvf - -C . --strip-components 1 && mv qemu-aarch64-static /usr/bin/qemu-static && chmod +x /usr/bin/qemu-static; \
 else \
-    printf '#!/bin/bash\nexec "$@"' > /usr/bin/qemu-static; \
+    printf '#!/bin/bash\nexec "$@"' > /usr/bin/qemu-static && chmod +x /usr/bin/qemu-static; \
 fi
-
-# set qemu exec flag
-RUN chmod +x /usr/bin/qemu-static
-
-# cleanup
-RUN dnf clean all && rm -rf /var/cache/dnf
 
 # set entrypoint
 ENTRYPOINT [ "/usr/bin/qemu-static" ]

@@ -2,6 +2,7 @@ ARG DIST="debian"
 ARG SUITE="buster"
 ARG QT_VERSION="5"
 ARG REPOSITORY="https://github.com/hyperion-project"
+ARG CMAKE_VERSION="3.28.3"
 
 FROM ${DIST}:${SUITE}
 
@@ -9,6 +10,7 @@ ARG DIST
 ARG SUITE
 ARG QT_VERSION
 ARG REPOSITORY
+ARG CMAKE_VERSION
 ARG TARGETPLATFORM
 
 LABEL maintainer="Hyperion Project <admin@hyperion-project.org>" \
@@ -21,34 +23,30 @@ LABEL maintainer="Hyperion Project <admin@hyperion-project.org>" \
     org.opencontainers.image.licenses="MIT"
 
 ENV TARGETPLATFORM=${TARGETPLATFORM:-linux/amd64}
-ENV QEMU_EXECVE=1
 ENV DEBFULLNAME="Hyperion Project"
 ENV DEBEMAIL="admin@hyperion-project.org"
-ENV APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=DontWarn
-ENV APT_INSTALL="apt-get -y install --no-install-recommends"
-ENV APT_UPDATE="apt-get -y update"
 
 ARG DEBIAN_FRONTEND=noninteractive
 
 # update
-RUN $APT_UPDATE
+RUN apt-get update
 
 # install qt5 or qt6 (qt6 is not available on ubuntu focal and debian buster)
 # on debian bullseye add backports to install qt6
 RUN if [ "$SUITE" != "buster" ] && [ "$SUITE" != "focal" ] && [ "$QT_VERSION" = "6" ]; then \
     if [ "$SUITE" = "bullseye" ]; then \
         echo "deb http://deb.debian.org/debian bullseye-backports main contrib non-free" | tee -a /etc/apt/sources.list; \
-        $APT_UPDATE; \
+        apt-get update; \
     fi; \
     if [ "$SUITE" = "jammy" ]; then SERIALPORT="libqt6serialport6-dev"; else SERIALPORT="qt6-serialport-dev"; fi; \
     if [ "$SUITE" = "jammy" ]; then WEBSOCKETS="libqt6websockets6-dev"; else WEBSOCKETS="qt6-websockets-dev"; fi; \
-    $APT_INSTALL qt6-base-dev $SERIALPORT $WEBSOCKETS libqt6sql6-sqlite libxkbcommon-dev libvulkan-dev libgl1-mesa-dev; \
+    apt-get -y install qt6-base-dev $SERIALPORT $WEBSOCKETS libqt6sql6-sqlite libxkbcommon-dev libvulkan-dev libgl1-mesa-dev; \
 else \
-    $APT_INSTALL qtbase5-dev libqt5serialport5-dev libqt5websockets5-dev libqt5sql5-sqlite libqt5svg5-dev; \
+    apt-get -y install qtbase5-dev libqt5serialport5-dev libqt5websockets5-dev libqt5sql5-sqlite libqt5svg5-dev; \
 fi
 
 # install general deps (all platforms/arch/os)
-RUN $APT_INSTALL \
+RUN apt-get -y install \
     devscripts \
     fakeroot \
     debhelper \
@@ -73,9 +71,23 @@ RUN $APT_INSTALL \
     libssl-dev \
     libglib2.0-dev
 
+# install X11/XCB on Ubuntu for all arch and on Debian for amd64
+# install libraspberrypi-dev on Debian for arm64/armhf
+RUN if [ "$DIST" = "ubuntu" ] || [ "$TARGETPLATFORM" = "linux/amd64" ]; then \
+    if [ "$QT_VERSION" = "5" ]; then \
+        apt-get -y install libqt5x11extras5-dev; \
+    fi; \
+    apt-get -y install libxcb-util0-dev libxcb-randr0-dev libxcb-shm0-dev libxcb-render0-dev libxcb-image0-dev libxrandr-dev libxrender-dev; \
+elif [ "$TARGETPLATFORM" = "linux/arm64" ] || [ "$TARGETPLATFORM" = "linux/arm/v7" ] && [ "$SUITE" != "trixie" ]; then \
+    apt-get -y install wget gpg dirmngr gpg-agent; \
+    echo "deb http://archive.raspberrypi.org/debian ${SUITE} main ui" >> /etc/apt/sources.list.d/raspi.list; \
+    apt-key adv --keyserver keyserver.ubuntu.com  --recv-key 0x82B129927FA3303E; \
+    apt-get update && apt-get -y install libraspberrypi-dev; \
+    rm /etc/apt/sources.list.d/raspi.list; \
+fi
+
 # Install CMake on amd64 and arm64
 # Compile and install CMake on armv7
-ENV CMAKE_VERSION="3.28.3"
 ENV CMAKE_URL="https://github.com/Kitware/CMake/releases/download/v${CMAKE_VERSION}/cmake-${CMAKE_VERSION}"
 RUN if [ "$TARGETPLATFORM" = "linux/amd64" ]; then \
     curl -OLs ${CMAKE_URL}-linux-x86_64.sh; \
@@ -91,8 +103,8 @@ else \
     mkdir -p /tmp/cmake; \
     cd /tmp/cmake; \
     curl -kL ${CMAKE_URL}.tar.gz | tar zxf - -C . --strip-components 1; \
-    ./bootstrap --prefix=/usr; \
-    make -j $(nproc); \
+    ./bootstrap --prefix=/usr; --parallel=`nproc`; \
+    make -j `nproc`; \
     make install; \
     cd && rm -rf /tmp/cmake; \
 fi
@@ -100,35 +112,14 @@ fi
 # Show cmake version
 RUN cmake --version 
 
-# install X11/XCB on Ubuntu for all arch and on Debian for amd64
-# install libraspberrypi-dev on Debian for arm64/armhf
-RUN if [ "$DIST" = "ubuntu" ] || [ "$TARGETPLATFORM" = "linux/amd64" ]; then \
-    if [ "$QT_VERSION" = "5" ]; then \
-        $APT_INSTALL libqt5x11extras5-dev; \
-    fi; \
-    $APT_INSTALL libxcb-util0-dev libxcb-randr0-dev libxcb-shm0-dev libxcb-render0-dev libxcb-image0-dev libxrandr-dev libxrender-dev; \
-elif [ "$TARGETPLATFORM" = "linux/arm64" ] || [ "$TARGETPLATFORM" = "linux/arm/v7" ] && [ "$SUITE" != "trixie" ]; then \
-    $APT_INSTALL wget gpg dirmngr gpg-agent; \
-    echo "deb http://archive.raspberrypi.org/debian ${SUITE} main ui" >> /etc/apt/sources.list.d/raspi.list; \
-    apt-key adv --keyserver keyserver.ubuntu.com  --recv-key 0x82B129927FA3303E; \
-    $APT_UPDATE && $APT_INSTALL libraspberrypi-dev; \
-    rm /etc/apt/sources.list.d/raspi.list; \
-fi
-
-# download qemu
+# download qemu and set exec flag
 RUN if [ "$TARGETPLATFORM" = "linux/arm64" ]; then \
-    curl -kL https://github.com/balena-io/qemu/releases/download/v7.0.0%2Bbalena1/qemu-7.0.0.balena1-aarch64.tar.gz | tar zxvf - -C . --strip-components 1 && mv qemu-aarch64-static /usr/bin/qemu-static; \
+    curl -kL https://github.com/balena-io/qemu/releases/download/v7.0.0%2Bbalena1/qemu-7.0.0.balena1-aarch64.tar.gz | tar zxvf - -C . --strip-components 1 && mv qemu-aarch64-static /usr/bin/qemu-static && chmod +x /usr/bin/qemu-static; \
 elif [ "$TARGETPLATFORM" = "linux/arm/v6" ] || [ "$TARGETPLATFORM" = "linux/arm/v7" ]; then \
-    curl -kL https://github.com/balena-io/qemu/releases/download/v7.0.0%2Bbalena1/qemu-7.0.0.balena1-arm.tar.gz | tar zxvf - -C . --strip-components 1 && mv qemu-arm-static /usr/bin/qemu-static; \
+    curl -kL https://github.com/balena-io/qemu/releases/download/v7.0.0%2Bbalena1/qemu-7.0.0.balena1-arm.tar.gz | tar zxvf - -C . --strip-components 1 && mv qemu-arm-static /usr/bin/qemu-static && chmod +x /usr/bin/qemu-static; \
 else \
-    printf '#!/bin/bash\nexec "$@"' > /usr/bin/qemu-static; \
+    printf '#!/bin/bash\nexec "$@"' > /usr/bin/qemu-static && chmod +x /usr/bin/qemu-static; \
 fi
-
-# set qemu exec flag
-RUN chmod +x /usr/bin/qemu-static
-
-# cleanup
-RUN apt-get clean -q -y && apt-get autoremove -y && rm -rf /var/lib/apt/lists/*
 
 # set entrypoint
 ENTRYPOINT [ "/usr/bin/qemu-static" ]

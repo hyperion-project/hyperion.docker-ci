@@ -1,18 +1,15 @@
 ARG SUITE="buster"
 ARG QT_VERSION="5"
 ARG REPOSITORY="https://github.com/hyperion-project"
+ARG CMAKE_VERSION="3.28.3"
 
 FROM balenalib/rpi-raspbian:${SUITE}
 
 ARG SUITE
 ARG QT_VERSION
 ARG REPOSITORY
+ARG CMAKE_VERSION
 ARG TARGETPLATFORM
-
-ENV QEMU_EXECVE=1
-ENV APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=DontWarn
-ENV APT_INSTALL="apt-get -y install --no-install-recommends"
-ENV APT_UPDATE="apt-get -y update"
 
 LABEL maintainer="Hyperion Project <admin@hyperion-project.org>" \
 	org.opencontainers.image.title="Debian ${SUITE} ${TARGETPLATFORM} - QT ${QT_VERSION}" \
@@ -23,18 +20,20 @@ LABEL maintainer="Hyperion Project <admin@hyperion-project.org>" \
     org.opencontainers.image.documentation="https://docs.hyperion-project.org" \
     org.opencontainers.image.licenses="MIT"
 
+ARG DEBIAN_FRONTEND=noninteractive
+
 # update
-RUN $APT_UPDATE
+RUN apt-get update
 
 # install qt5 or qt6 (qt6 is not available on debian buster/bullseye)
 RUN if [ "$SUITE" = "bookworm" ] && [ "$QT_VERSION" = "6" ]; then \
-    $APT_INSTALL qt6-base-dev qt6-serialport-dev qt6-websockets-dev libxkbcommon-dev libvulkan-dev libgl1-mesa-dev; \
+    apt-get -y install qt6-base-dev qt6-serialport-dev qt6-websockets-dev libxkbcommon-dev libvulkan-dev libgl1-mesa-dev; \
 else \
-    $APT_INSTALL qtbase5-dev libqt5serialport5-dev libqt5websockets5-dev libqt5sql5-sqlite libqt5svg5-dev; \
+    apt-get -y install qtbase5-dev libqt5serialport5-dev libqt5websockets5-dev libqt5sql5-sqlite libqt5svg5-dev; \
 fi
 
 # install deps
-RUN $APT_INSTALL \
+RUN apt-get -y install \
     devscripts \
     fakeroot \
     debhelper \
@@ -61,26 +60,21 @@ RUN $APT_INSTALL \
     libglib2.0-dev
 
 # Compile and install CMake
-ENV CMAKE_VERSION="3.28.3"
 ENV CMAKE_URL="https://github.com/Kitware/CMake/releases/download/v${CMAKE_VERSION}/cmake-${CMAKE_VERSION}"
-RUN set -xe \
-    && mkdir -p /tmp/cmake \
-    && cd /tmp/cmake \
-    && curl -kL ${CMAKE_URL}.tar.gz | tar zxf - -C . --strip-components 1 \
-    && ./bootstrap --prefix=/usr \
-    && make -j $(nproc) \
-    && make install \
-    && cd \
-    && rm -rf /tmp/cmake
+RUN mkdir -p /tmp/cmake; \
+    cd /tmp/cmake; \
+    curl -kL ${CMAKE_URL}.tar.gz | tar zxf - -C . --strip-components 1; \
+    sed -i -e 's/|aarch64//g' Source/Checks/cm_cxx_features.cmake; \
+    ./bootstrap --prefix=/usr --parallel=`nproc`; \
+    make -j `nproc`; \
+    make install; \
+    cd && rm -rf /tmp/cmake
 
 # Show cmake version
-RUN cmake --version 
+RUN cmake --version
 
 # download qemu and set exec flag
 RUN curl -kL https://github.com/balena-io/qemu/releases/download/v7.0.0%2Bbalena1/qemu-7.0.0.balena1-arm.tar.gz | tar zxvf - -C . --strip-components 1 && mv qemu-arm-static /usr/bin/qemu-static && chmod +x /usr/bin/qemu-static
-
-# cleanup
-RUN apt-get clean -q -y && apt-get autoremove -y && rm -rf /var/lib/apt/lists/*
 
 # set entrypoint
 ENTRYPOINT [ "/usr/bin/qemu-static" ]
