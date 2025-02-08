@@ -26,7 +26,7 @@ jobs:
 
   ubuntu_debian:
     name: 🐧 ${{ matrix.os.description }} Qt ${{ matrix.qt_version }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     strategy:
       fail-fast: false
       matrix:
@@ -109,7 +109,7 @@ jobs:
   debian_armv6:
     name: 🐧 ${{ matrix.os.description }} Qt ${{ matrix.qt_version }} (armv6)
     needs: [ ubuntu_debian ]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     strategy:
       fail-fast: false
       matrix:
@@ -154,7 +154,7 @@ jobs:
 
   fedora:
     name: 🐧 ${{ matrix.description }} ${{ matrix.tag }}  Qt ${{ matrix.qt_version }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     strategy:
       fail-fast: false
       matrix:
