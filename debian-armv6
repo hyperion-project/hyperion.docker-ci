@@ -23,7 +23,7 @@ LABEL maintainer="Hyperion Project <admin@hyperion-project.org>" \
 ARG DEBIAN_FRONTEND=noninteractive
 
 # update
-RUN apt-get update
+RUN apt-get update && apt-get -y upgrade
 
 # install qt5 or qt6 (qt6 is not available on debian buster/bullseye)
 RUN if [ "$SUITE" = "bookworm" ] && [ "$QT_VERSION" = "6" ]; then \
@@ -74,7 +74,13 @@ RUN mkdir -p /tmp/cmake; \
 RUN cmake --version
 
 # download qemu and set exec flag
-RUN curl -kL https://github.com/balena-io/qemu/releases/download/v7.0.0%2Bbalena1/qemu-7.0.0.balena1-arm.tar.gz | tar zxvf - -C . --strip-components 1 && mv qemu-arm-static /usr/bin/qemu-static && chmod +x /usr/bin/qemu-static
+RUN curl -kL https://github.com/balena-io/qemu/releases/download/v7.0.0%2Bbalena1/qemu-7.0.0.balena1-arm.tar.gz | tar zxvf - -C . --strip-components 1 && mv qemu-arm-static /usr/bin/qemu-static
+
+# set qemu exec flag
+RUN chmod +x /usr/bin/qemu-static
+
+# cleanup
+RUN apt-get clean -q -y && apt-get autoremove -y && rm -rf /var/lib/apt/lists/*
 
 # set entrypoint
 ENTRYPOINT [ "/usr/bin/qemu-static" ]

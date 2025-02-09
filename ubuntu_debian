@@ -29,7 +29,7 @@ ENV DEBEMAIL="admin@hyperion-project.org"
 ARG DEBIAN_FRONTEND=noninteractive
 
 # update
-RUN apt-get update
+RUN apt-get update && apt-get -y upgrade
 
 # install qt5 or qt6 (qt6 is not available on ubuntu focal and debian buster)
 # on debian bullseye add backports to install qt6
@@ -112,14 +112,20 @@ fi
 # Show cmake version
 RUN cmake --version 
 
-# download qemu and set exec flag
+# download qemu
 RUN if [ "$TARGETPLATFORM" = "linux/arm64" ]; then \
-    curl -kL https://github.com/balena-io/qemu/releases/download/v7.0.0%2Bbalena1/qemu-7.0.0.balena1-aarch64.tar.gz | tar zxvf - -C . --strip-components 1 && mv qemu-aarch64-static /usr/bin/qemu-static && chmod +x /usr/bin/qemu-static; \
+    curl -kL https://github.com/balena-io/qemu/releases/download/v7.0.0%2Bbalena1/qemu-7.0.0.balena1-aarch64.tar.gz | tar zxvf - -C . --strip-components 1 && mv qemu-aarch64-static /usr/bin/qemu-static; \
 elif [ "$TARGETPLATFORM" = "linux/arm/v6" ] || [ "$TARGETPLATFORM" = "linux/arm/v7" ]; then \
-    curl -kL https://github.com/balena-io/qemu/releases/download/v7.0.0%2Bbalena1/qemu-7.0.0.balena1-arm.tar.gz | tar zxvf - -C . --strip-components 1 && mv qemu-arm-static /usr/bin/qemu-static && chmod +x /usr/bin/qemu-static; \
+    curl -kL https://github.com/balena-io/qemu/releases/download/v7.0.0%2Bbalena1/qemu-7.0.0.balena1-arm.tar.gz | tar zxvf - -C . --strip-components 1 && mv qemu-arm-static /usr/bin/qemu-static; \
 else \
-    printf '#!/bin/bash\nexec "$@"' > /usr/bin/qemu-static && chmod +x /usr/bin/qemu-static; \
+    printf '#!/bin/bash\nexec "$@"' > /usr/bin/qemu-static; \
 fi
+
+# set qemu exec flag
+RUN chmod +x /usr/bin/qemu-static
+
+# cleanup
+RUN apt-get clean -q -y && apt-get autoremove -y && rm -rf /var/lib/apt/lists/*
 
 # set entrypoint
 ENTRYPOINT [ "/usr/bin/qemu-static" ]
