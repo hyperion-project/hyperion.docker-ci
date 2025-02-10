@@ -29,7 +29,7 @@ ENV DEBEMAIL="admin@hyperion-project.org"
 ARG DEBIAN_FRONTEND=noninteractive
 
 # update
-RUN apt-get update && apt-get -y upgrade
+RUN apt-get update
 
 # install qt5 or qt6 (qt6 is not available on ubuntu focal and debian buster)
 # on debian bullseye add backports to install qt6
@@ -128,4 +128,4 @@ RUN chmod +x /usr/bin/qemu-static
 RUN apt-get clean -q -y && apt-get autoremove -y && rm -rf /var/lib/apt/lists/*
 
 # set entrypoint
-ENTRYPOINT [ "/usr/bin/qemu-static" ]
+ENTRYPOINT [ "/usr/bin/qemu-static", "/usr/bin/env", "QEMU_EXECVE=1" ]

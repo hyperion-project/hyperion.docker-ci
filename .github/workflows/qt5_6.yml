@@ -106,7 +106,7 @@ jobs:
   merge:
     name: 👷 Merge and 🚀 Push
     needs: build_and_push
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     env:
       TAG: ${{ inputs.qt_version == '6' && format('{0}-qt6', inputs.codename) || inputs.codename }}
 
