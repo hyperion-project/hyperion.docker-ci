@@ -9,18 +9,11 @@ ARG SUITE
 ARG QT_VERSION
 ARG REPOSITORY
 ARG CMAKE_VERSION
+ARG DEBIAN_FRONTEND=noninteractive
 ARG TARGETPLATFORM
 
-LABEL maintainer="Hyperion Project <admin@hyperion-project.org>" \
-	org.opencontainers.image.title="Debian ${SUITE} ${TARGETPLATFORM} - QT ${QT_VERSION}" \
-	org.opencontainers.image.description="Compilation environment to build Hyperion for Debian ${SUITE}" \
-	org.opencontainers.image.url="${REPOSITORY}" \
-	org.opencontainers.image.source="${REPOSITORY}/hyperion.docker-ci" \
-	org.opencontainers.image.vendor="Hyperion Project" \
-    org.opencontainers.image.documentation="https://docs.hyperion-project.org" \
-    org.opencontainers.image.licenses="MIT"
-
-ARG DEBIAN_FRONTEND=noninteractive
+ENV QEMU_EXECVE=1
+ENV TARGETPLATFORM=${TARGETPLATFORM:-linux/arm/v6}
 
 # update
 RUN apt-get update
@@ -80,4 +73,4 @@ RUN curl -kL https://github.com/balena-io/qemu/releases/download/v7.0.0%2Bbalena
 RUN chmod +x /usr/bin/qemu-static
 
 # set entrypoint
-ENTRYPOINT [ "/usr/bin/qemu-static", "/usr/bin/env", "QEMU_EXECVE=1" ]
+ENTRYPOINT [ "/usr/bin/qemu-static" ]
