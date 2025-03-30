@@ -24,7 +24,7 @@ on:
 env:
   SECRET_DOCKER_CI: ${{ secrets.DOCKER_CI }}
   REPOSITORY: hyperion-project
-  CMAKE_VERSION: 3.31.5
+  CMAKE_VERSION: 3.31.6
 
 jobs:
 
