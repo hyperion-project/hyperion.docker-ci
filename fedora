@@ -50,7 +50,8 @@ RUN dnf -y group install 'development-tools' 'c-development' 'rpm-development-to
     openssl-devel \
     libcec-devel \
     alsa-lib-devel \
-    libftdi-devel
+    libftdi-devel \
+    systemd-devel
 
 # Install CMake on amd64 and arm64
 ENV CMAKE_URL="https://github.com/Kitware/CMake/releases/download/v${CMAKE_VERSION}/cmake-${CMAKE_VERSION}"
