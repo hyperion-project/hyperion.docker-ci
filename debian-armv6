@@ -1,4 +1,5 @@
 ARG SUITE="buster"
+ARG UPGRADE_TO_TRIXIE="false"
 ARG QT_VERSION="5"
 ARG REPOSITORY="https://github.com/hyperion-project"
 ARG CMAKE_VERSION="3.28.3"
@@ -6,6 +7,7 @@ ARG CMAKE_VERSION="3.28.3"
 FROM balenalib/rpi-raspbian:${SUITE}
 
 ARG SUITE
+ARG UPGRADE_TO_TRIXIE
 ARG QT_VERSION
 ARG REPOSITORY
 ARG CMAKE_VERSION
@@ -17,6 +19,13 @@ ENV TARGETPLATFORM=${TARGETPLATFORM:-linux/arm/v6}
 
 # update
 RUN apt-get update
+
+# upgrade from Bookworm to Trixie
+RUN if [ "$UPGRADE_TO_TRIXIE" = "true" ]; then \
+    apt-get dist-upgrade; \
+    sed -i -e 's/bookworm/trixie/g' /etc/apt/sources.list; \
+    apt update && apt-get -y full-upgrade && apt -y clean && apt -y autoremove; \
+fi
 
 # install qt5 or qt6 (qt6 is not available on debian buster/bullseye)
 RUN if [ "$SUITE" = "bookworm" ] && [ "$QT_VERSION" = "6" ]; then \
