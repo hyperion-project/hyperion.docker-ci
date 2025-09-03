@@ -123,7 +123,7 @@ jobs:
 
     steps:
       - name: 💾 Download digests
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           path: /tmp/digests
           pattern: ${{ inputs.distribution }}-${{ inputs.codename }}-qt${{ inputs.qt_version }}-*
