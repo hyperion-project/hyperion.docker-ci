@@ -63,6 +63,9 @@ RUN apt-get -y install \
     libssl-dev \
     libglib2.0-dev
 
+# Mark /source as safe directory for git (used in CI mounts)
+RUN git config --system --add safe.directory /source
+
 # install X11/XCB on Ubuntu for all arch and on Debian for amd64
 # install libraspberrypi-dev on Debian for arm64/armhf
 RUN if [ "$DIST" = "ubuntu" ] || [ "$TARGETPLATFORM" = "linux/amd64" ]; then \

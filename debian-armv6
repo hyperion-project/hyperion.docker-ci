@@ -60,6 +60,9 @@ RUN apt-get -y install \
     libssl-dev \
     libraspberrypi-dev \
     libglib2.0-dev
+    
+# Mark /source as safe directory for git (used in CI mounts)
+RUN git config --system --add safe.directory /source
 
 # Compile and install CMake
 ENV CMAKE_URL="https://github.com/Kitware/CMake/releases/download/v${CMAKE_VERSION}/cmake-${CMAKE_VERSION}"

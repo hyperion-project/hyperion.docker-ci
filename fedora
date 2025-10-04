@@ -52,6 +52,9 @@ RUN dnf -y group install 'development-tools' 'c-development' 'rpm-development-to
     alsa-lib-devel \
     libftdi-devel \
     systemd-devel
+    
+# Mark /source as safe directory for git (used in CI mounts)
+RUN git config --system --add safe.directory /source
 
 # Install CMake on amd64 and arm64
 ENV CMAKE_URL="https://github.com/Kitware/CMake/releases/download/v${CMAKE_VERSION}/cmake-${CMAKE_VERSION}"
