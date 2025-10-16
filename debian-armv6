@@ -59,7 +59,8 @@ RUN apt-get -y install \
     libftdi1-dev \
     libssl-dev \
     libraspberrypi-dev \
-    libglib2.0-dev
+    libglib2.0-dev \
+    libdrm-dev
     
 # Mark /source as safe directory for git (used in CI mounts)
 RUN git config --system --add safe.directory /source

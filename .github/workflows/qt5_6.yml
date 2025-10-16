@@ -10,11 +10,11 @@ on:
         required: false
       codename:
         type: string
-        default: 'focal'
+        default: 'jammy'
         required: false
       qt_version:
         type: string
-        default: '5'
+        default: '6'
         required: false
       target_platform:
         type: string
