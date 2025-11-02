@@ -96,11 +96,10 @@ jobs:
           outputs: type=image,name=ghcr.io/${{ env.REPOSITORY }}/${{ inputs.distribution }},push-by-digest=true,name-canonical=true,push=true
           build-args: |
             DIST=${{ inputs.distribution }}
-            SUITE=${{ inputs.codename == 'trixie' && matrix.target_platform == 'armv6' && 'bookworm' || inputs.codename }}
+            SUITE=${{ inputs.codename }}
             QT_VERSION=${{ inputs.qt_version }}
             REPOSITORY="${{ github.server_url }}/${{ env.REPOSITORY }}"
             CMAKE_VERSION=${{ env.CMAKE_VERSION }}
-            UPGRADE_TO_TRIXIE=${{ inputs.codename == 'trixie' && matrix.target_platform == 'armv6' && 'true' || 'false' }}
 
       - name: ⬇ Export digest
         run: |
