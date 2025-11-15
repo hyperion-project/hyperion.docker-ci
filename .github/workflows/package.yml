@@ -17,18 +17,19 @@ jobs:
       fail-fast: false
       matrix:
         os: [
-          { distribution: ubuntu, codename: jammy,    description: Ubuntu 22.04 (Jammy Jellyfish), target_platform: "['amd64', 'arm64', 'armv7']" },
-          { distribution: ubuntu, codename: noble,    description: Ubuntu 24.04 (Noble Numbat),    target_platform: "['amd64', 'arm64', 'armv7']" },
-          { distribution: ubuntu, codename: plucky,   description: Ubuntu 25.04 (Plucky Puffin),   target_platform: "['amd64', 'arm64', 'armv7']" },
-          { distribution: ubuntu, codename: questing, description: Ubuntu 25.10 (Questing Quokka), target_platform: "['amd64', 'arm64', 'armv7']" },        
-          { distribution: debian, codename: bullseye, description: Debian 11.x  (Bullseye),        target_platform: "['amd64', 'arm64', 'armv6', 'armv7']" },
-          { distribution: debian, codename: bookworm, description: Debian 12.x  (Bookworm),        target_platform: "['amd64', 'arm64', 'armv6', 'armv7']" },
-          { distribution: debian, codename: trixie,   description: Debian 13.x  (Trixie),          target_platform: "['amd64', 'arm64', 'armv6', 'armv7']" },
-          { distribution: fedora, codename: 39,       description: Fedora 39,                      target_platform: "['amd64', 'arm64']" },
-          { distribution: fedora, codename: 40,       description: Fedora 40,                      target_platform: "['amd64', 'arm64']" },
-          { distribution: fedora, codename: 41,       description: Fedora 41,                      target_platform: "['amd64', 'arm64']" },
-          { distribution: fedora, codename: 42,       description: Fedora 42,                      target_platform: "['amd64', 'arm64']" },
-          { distribution: fedora, codename: 43,       description: Fedora 43,                      target_platform: "['amd64', 'arm64']" }
+          { distribution: ubuntu, codename: jammy,    description: Ubuntu 22.04 LTS (Jammy Jellyfish),  target_platform: "['amd64', 'arm64', 'armv7']" },
+          { distribution: ubuntu, codename: noble,    description: Ubuntu 24.04 LTS (Noble Numbat),     target_platform: "['amd64', 'arm64', 'armv7']" },
+          { distribution: ubuntu, codename: plucky,   description: Ubuntu 25.04 (Plucky Puffin),        target_platform: "['amd64', 'arm64', 'armv7']" },
+          { distribution: ubuntu, codename: questing, description: Ubuntu 25.10 (Questing Quokka),      target_platform: "['amd64', 'arm64', 'armv7']" },
+          { distribution: ubuntu, codename: resolute, description: Ubuntu 26.04 LTS (Resolute Raccoon), target_platform: "['amd64', 'arm64', 'armv7']" },
+          { distribution: debian, codename: bullseye, description: Debian 11.x (Bullseye),              target_platform: "['amd64', 'arm64', 'armv6', 'armv7']" },
+          { distribution: debian, codename: bookworm, description: Debian 12.x (Bookworm),              target_platform: "['amd64', 'arm64', 'armv6', 'armv7']" },
+          { distribution: debian, codename: trixie,   description: Debian 13.x (Trixie),                target_platform: "['amd64', 'arm64', 'armv6', 'armv7']" },
+          { distribution: fedora, codename: 39,       description: Fedora 39,                           target_platform: "['amd64', 'arm64']" },
+          { distribution: fedora, codename: 40,       description: Fedora 40,                           target_platform: "['amd64', 'arm64']" },
+          { distribution: fedora, codename: 41,       description: Fedora 41,                           target_platform: "['amd64', 'arm64']" },
+          { distribution: fedora, codename: 42,       description: Fedora 42,                           target_platform: "['amd64', 'arm64']" },
+          { distribution: fedora, codename: 43,       description: Fedora 43,                           target_platform: "['amd64', 'arm64']" }
         ]
         qt_version: [ 5, 6 ]
         # Qt6 on Debian Bullseye (only armv6) is excluded in reusable workflow qt5_6.yml because target_platform is passed as string to reusable workflow
