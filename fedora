@@ -52,7 +52,8 @@ RUN dnf -y group install 'development-tools' 'c-development' 'rpm-development-to
     alsa-lib-devel \
     libftdi-devel \
     systemd-devel \
-    libdrm-devel
+    libdrm-devel \
+		libatomic-devel
     
 # Mark /source as safe directory for git (used in CI mounts)
 RUN git config --system --add safe.directory /source
