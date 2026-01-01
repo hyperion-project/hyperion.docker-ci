@@ -108,7 +108,7 @@ jobs:
           touch "/tmp/digests/${digest#sha256:}"
 
       - name: 📦 Upload digest
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: ${{ inputs.distribution }}-${{ inputs.codename }}-qt${{ inputs.qt_version }}-${{ matrix.target_platform }}
           path: /tmp/digests/*
