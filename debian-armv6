@@ -20,7 +20,7 @@ RUN apt-get update
 
 # adding raspberrypi repository
 RUN apt-get -y install --no-install-recommends ca-certificates curl gnupg; \
-    curl -fsSL http://archive.raspberrypi.org/debian/raspberrypi.gpg.key | gpg --dearmor -o /usr/share/keyrings/raspberrypi-archive-keyring.gpg; \
+    curl -fsSL https://github.com/raspberrypi/rpi-image-gen/raw/master/keydir/raspberrypi-archive-keyring.gpg | gpg --dearmor -o /usr/share/keyrings/raspberrypi-archive-keyring.gpg; \
     echo "deb [signed-by=/usr/share/keyrings/raspberrypi-archive-keyring.gpg] http://archive.raspberrypi.org/debian/ ${SUITE} main" > /etc/apt/sources.list.d/raspi.list; \
     apt-get update
 
