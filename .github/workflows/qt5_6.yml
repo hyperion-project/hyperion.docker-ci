@@ -63,7 +63,7 @@ jobs:
           sudo apt-get update -qq
           sudo apt-get install -y --no-install-recommends debuerreotype debootstrap gnupg qemu-user-static xz-utils
 
-          WORKDIR="$(mktemp -d /tmp/raspbian-build)"
+          WORKDIR="$(mktemp -d /tmp/raspbian-build.XXXXXXXX)"
 
           sudo debuerreotype-init --arch "armhf" --keyring "/usr/share/keyrings/raspbian-archive-keyring.gpg" "${WORKDIR}/rootfs" "${{ inputs.codename }}" "http://raspbian.raspberrypi.org/raspbian/"
           sudo debuerreotype-minimizing-config "${WORKDIR}/rootfs"
