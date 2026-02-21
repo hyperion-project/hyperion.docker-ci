@@ -63,6 +63,10 @@ jobs:
           sudo apt-get update -qq
           sudo apt-get install -y --no-install-recommends debuerreotype debootstrap gnupg qemu-user-static xz-utils
 
+          wget -O Release.gpg "http://archive.raspbian.org/raspbian/dists/${{ inputs.codename }}/Release.gpg"
+          wget -O Release "http://archive.raspbian.org/raspbian/dists/${{ inputs.codename }}/Release"
+          gpgv --keyring /usr/share/keyrings/raspbian-archive-keyring.gpg Release.gpg Release
+
           WORKDIR="$(mktemp -d /tmp/raspbian-build.XXXXXXXX)"
 
           sudo debuerreotype-init --arch "armhf" --non-debian --keyring "/usr/share/keyrings/raspbian-archive-keyring.gpg" --no-merged-usr "${WORKDIR}/rootfs" "${{ inputs.codename }}" "http://raspbian.raspberrypi.org/raspbian/"
