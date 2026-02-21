@@ -65,7 +65,7 @@ jobs:
 
           WORKDIR="$(mktemp -d /tmp/raspbian-build.XXXXXXXX)"
 
-          sudo debuerreotype-init --arch "armhf" --keyring "/usr/share/keyrings/raspbian-archive-keyring.gpg" "${WORKDIR}/rootfs" "${{ inputs.codename }}" "http://raspbian.raspberrypi.org/raspbian/"
+          sudo debuerreotype-init --arch "armhf" --non-debian --keyring "/usr/share/keyrings/raspbian-archive-keyring.gpg" --no-merged-usr "${WORKDIR}/rootfs" "${{ inputs.codename }}" "http://raspbian.raspberrypi.org/raspbian/"
           sudo debuerreotype-minimizing-config "${WORKDIR}/rootfs"
           sudo debuerreotype-tar "${WORKDIR}/rootfs" "${WORKDIR}/rootfs.tar.xz"
           sudo chown "$(id -u):$(id -g)" "${WORKDIR}/rootfs.tar.xz"
