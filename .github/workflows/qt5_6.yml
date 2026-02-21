@@ -30,7 +30,7 @@ jobs:
 
   build_and_push:
     name: 👷 Build ${{ matrix.target_platform }}
-    runs-on: ${{ matrix.target_platform == 'amd64' && 'ubuntu-22.04' || 'ubuntu-22.04-arm' }}
+    runs-on: ${{ matrix.target_platform == 'amd64' && 'ubuntu-24.04' || 'ubuntu-24.04-arm' }}
     services:
       registry:
         image: registry:2
