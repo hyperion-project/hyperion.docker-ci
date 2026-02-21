@@ -3,7 +3,7 @@ ARG QT_VERSION="6"
 ARG REPOSITORY="https://github.com/hyperion-project"
 ARG CMAKE_VERSION="3.28.3"
 
-FROM tianon/raspbian:${SUITE}-slim
+FROM raspbian:local
 
 ARG SUITE
 ARG QT_VERSION
