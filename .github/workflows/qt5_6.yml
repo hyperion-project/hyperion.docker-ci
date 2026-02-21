@@ -31,6 +31,11 @@ jobs:
   build_and_push:
     name: 👷 Build ${{ matrix.target_platform }}
     runs-on: ${{ matrix.target_platform == 'amd64' && 'ubuntu-22.04' || 'ubuntu-22.04-arm' }}
+    services:
+      registry:
+        image: registry:2
+        ports:
+          - 5000:5000
     strategy:
       fail-fast: false
       matrix:
@@ -53,7 +58,7 @@ jobs:
       - name: 🐳 Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
         with:
-          driver: docker
+          driver-opts: network=host
 
       - name: 🔧 Set up QEMU (armv6 only)
         if: ${{ matrix.target_platform == 'armv6' }}
@@ -81,6 +86,8 @@ jobs:
           sudo chown "$(id -u):$(id -g)" "${WORKDIR}/rootfs.tar.xz"
 
           xzcat "${WORKDIR}/rootfs.tar.xz" | docker import --platform "linux/arm/v6" --change 'CMD ["/bin/bash"]' - raspbian:local
+          docker image tag raspbian:local localhost:5000/raspbian:local
+          docker image push localhost:5000/raspbian:local
 
           sudo rm -rf "${WORKDIR}"
 
@@ -129,7 +136,7 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           provenance: false
           outputs: type=image,name=ghcr.io/${{ env.REPOSITORY }}/${{ inputs.distribution }},push-by-digest=true,name-canonical=true,push=true
-          build-contexts: ${{ matrix.target_platform == 'armv6' && 'raspbian:local=docker-image://raspbian:local' || '' }}
+          build-contexts: ${{ matrix.target_platform == 'armv6' && 'raspbian:local=docker-image://localhost:5000/raspbian:local' || '' }}
           build-args: |
             DIST=${{ inputs.distribution }}
             SUITE=${{ inputs.codename }}
