@@ -19,13 +19,15 @@ ENV TARGETPLATFORM=${TARGETPLATFORM:-linux/arm/v6}
 RUN apt-get update
 
 # adding raspberrypi repository
-RUN apt-get -y install --no-install-recommends ca-certificates curl gnupg; \
+RUN if [ "$SUITE" != "forky" ]; then \
+    apt-get -y install --no-install-recommends ca-certificates curl gnupg; \
     curl -fsSL https://github.com/raspberrypi/rpi-image-gen/raw/master/keydir/raspberrypi-archive-keyring.gpg | gpg --dearmor -o /usr/share/keyrings/raspberrypi-archive-keyring.gpg; \
     echo "deb [signed-by=/usr/share/keyrings/raspberrypi-archive-keyring.gpg] http://archive.raspberrypi.org/debian/ ${SUITE} main" > /etc/apt/sources.list.d/raspi.list; \
-    apt-get update
+    apt-get update; \
+fi
 
 # install qt5 or qt6 (qt6 is not available on debian buster/bullseye)
-RUN if [ "$SUITE" = "bookworm" ] || [ "$SUITE" = "trixie" ] && [ "$QT_VERSION" = "6" ]; then \
+RUN if [ "$SUITE" = "bookworm" ] || [ "$SUITE" = "trixie" ] || [ "$SUITE" = "forky" ] && [ "$QT_VERSION" = "6" ]; then \
     apt-get -y install qt6-base-dev libqt6sql6-sqlite qt6-serialport-dev qt6-websockets-dev libxkbcommon-dev libvulkan-dev libgl1-mesa-dev; \
 else \
     apt-get -y install qtbase5-dev libqt5serialport5-dev libqt5websockets5-dev libqt5sql5-sqlite libqt5svg5-dev; \
@@ -57,7 +59,7 @@ RUN apt-get -y install \
     libglib2.0-dev \
     libdrm-dev
 
-RUN if [ "$SUITE" != "trixie" ]; then \
+RUN if [ "$SUITE" != "trixie" ] && [ "$SUITE" != "forky" ]; then \
     apt-get -y install --no-install-recommends libraspberrypi-dev; \
 fi
     

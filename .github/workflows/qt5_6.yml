@@ -78,16 +78,12 @@ jobs:
           wget -O "${WORKDIR}/Release" "http://archive.raspbian.org/raspbian/dists/${{ inputs.codename }}/Release"
           gpgv --keyring /usr/share/keyrings/raspbian-archive-keyring.pgp "${WORKDIR}/Release.gpg" "${WORKDIR}/Release"
 
-          echo "==> debuerreotype-init"
           sudo debuerreotype-init --arch "armhf" --non-debian --keyring "/usr/share/keyrings/raspbian-archive-keyring.pgp" "${WORKDIR}/rootfs" "${{ inputs.codename }}" "http://raspbian.raspberrypi.org/raspbian/"
-          echo "==> debuerreotype-minimizing-config"
           sudo debuerreotype-minimizing-config "${WORKDIR}/rootfs"
 
-          echo "==> Creating rootfs tarball..."
           sudo debuerreotype-tar "${WORKDIR}/rootfs" "${WORKDIR}/rootfs.tar.xz"
           sudo chown "$(id -u):$(id -g)" "${WORKDIR}/rootfs.tar.xz"
 
-          echo "==> Importing rootfs into local Docker daemon as raspbian:${{ inputs.codename }}..."
           xzcat "${WORKDIR}/rootfs.tar.xz" | docker import --platform "linux/arm/v6" --change 'CMD ["/bin/bash"]' - raspbian:${{ inputs.codename }}
           docker image tag raspbian:${{ inputs.codename }} localhost:5000/raspbian:${{ inputs.codename }}
           docker image push localhost:5000/raspbian:${{ inputs.codename }}
