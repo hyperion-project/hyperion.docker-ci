@@ -82,6 +82,10 @@ jobs:
 
           sudo rm -rf "${WORKDIR}"
 
+      - name: 🍓 Inspect raspbian:local image
+        if: ${{ matrix.target_platform == 'armv6' }}
+        run: docker image inspect raspbian:local
+
       - name: 🐳 Set up Docker metadata
         id: meta
         uses: docker/metadata-action@v5
