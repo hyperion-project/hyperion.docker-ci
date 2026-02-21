@@ -63,13 +63,17 @@ jobs:
           sudo apt-get update -qq
           sudo apt-get install -y --no-install-recommends debuerreotype debootstrap gnupg qemu-user-static xz-utils
 
-          wget -O Release.gpg "http://archive.raspbian.org/raspbian/dists/${{ inputs.codename }}/Release.gpg"
-          wget -O Release "http://archive.raspbian.org/raspbian/dists/${{ inputs.codename }}/Release"
-          gpgv --keyring /usr/share/keyrings/raspbian-archive-keyring.gpg Release.gpg Release
-
           WORKDIR="$(mktemp -d /tmp/raspbian-build.XXXXXXXX)"
 
-          sudo debuerreotype-init --arch "armhf" --non-debian --keyring "/usr/share/keyrings/raspbian-archive-keyring.gpg" --no-merged-usr "${WORKDIR}/rootfs" "${{ inputs.codename }}" "http://raspbian.raspberrypi.org/raspbian/"
+          wget -O "raspbian-archive-keyring.pgp.asc" "https://archive.raspbian.org/raspbian.public.key"
+          gpg --batch --no-default-keyring --keyring "/usr/share/keyrings/raspbian-archive-keyring.pgp" --import "raspbian-archive-keyring.pgp.asc"
+          rm -f "raspbian-archive-keyring.pgp.asc"
+
+          wget -O Release.gpg "http://archive.raspbian.org/raspbian/dists/${{ inputs.codename }}/Release.gpg"
+          wget -O Release "http://archive.raspbian.org/raspbian/dists/${{ inputs.codename }}/Release"
+          gpgv --keyring /usr/share/keyrings/raspbian-archive-keyring.pgp Release.gpg Release
+
+          sudo debuerreotype-init --arch "armhf" --non-debian --keyring "/usr/share/keyrings/raspbian-archive-keyring.pgp" --no-merged-usr "${WORKDIR}/rootfs" "${{ inputs.codename }}" "http://raspbian.raspberrypi.org/raspbian/"
           sudo debuerreotype-minimizing-config "${WORKDIR}/rootfs"
           sudo debuerreotype-tar "${WORKDIR}/rootfs" "${WORKDIR}/rootfs.tar.xz"
           sudo chown "$(id -u):$(id -g)" "${WORKDIR}/rootfs.tar.xz"
