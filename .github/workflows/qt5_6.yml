@@ -61,7 +61,7 @@ jobs:
         if: ${{ matrix.target_platform == 'armv6' }}
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y --no-install-recommends debuerreotype debootstrap gnupg qemu-user-static raspbian-archive-keyring xz-utils
+          sudo apt-get install -y --no-install-recommends debuerreotype debootstrap gnupg qemu-user-static xz-utils
 
           WORKDIR="$(mktemp -d /tmp/raspbian-build)"
 
