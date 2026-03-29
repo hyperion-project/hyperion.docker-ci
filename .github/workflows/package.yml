@@ -29,7 +29,9 @@ jobs:
           { distribution: fedora, codename: 40,       description: Fedora 40,                           target_platform: "['amd64', 'arm64']" },
           { distribution: fedora, codename: 41,       description: Fedora 41,                           target_platform: "['amd64', 'arm64']" },
           { distribution: fedora, codename: 42,       description: Fedora 42,                           target_platform: "['amd64', 'arm64']" },
-          { distribution: fedora, codename: 43,       description: Fedora 43,                           target_platform: "['amd64', 'arm64']" }
+          { distribution: fedora, codename: 43,       description: Fedora 43,                           target_platform: "['amd64', 'arm64']" },
+          { distribution: fedora, codename: 44,       description: Fedora 44,                           target_platform: "['amd64', 'arm64']" },
+          { distribution: fedora, codename: 45,       description: Fedora 45,                           target_platform: "['amd64', 'arm64']" }
         ]
         qt_version: [ 5, 6 ]
         # Qt6 on Debian Bullseye (only armv6) is excluded in reusable workflow qt5_6.yml because target_platform is passed as string to reusable workflow
