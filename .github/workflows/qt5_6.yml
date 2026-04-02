@@ -86,7 +86,7 @@ jobs:
 
       - name: 👷 Build and 🚀 Push digest to GitHub Container/Package Registry
         id: build
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: .
           file: ${{ matrix.target_platform == 'armv6' && 'debian-armv6' || inputs.distribution == 'fedora' && 'fedora' || 'ubuntu_debian' }}
