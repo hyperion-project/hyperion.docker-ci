@@ -55,7 +55,7 @@ jobs:
 
       - name: 🐳 Set up Docker metadata
         id: meta
-        uses: docker/metadata-action@v5
+        uses: docker/metadata-action@v6
         with:
           images: ghcr.io/${{ env.REPOSITORY }}/${{ inputs.distribution }}
           tags: ${{ inputs.qt_version == '6' && format('{0}-qt6', inputs.codename) || inputs.codename }}
@@ -137,7 +137,7 @@ jobs:
 
       - name: 🐳 Set up Docker metadata
         id: meta
-        uses: docker/metadata-action@v5
+        uses: docker/metadata-action@v6
         with:
           images: ghcr.io/${{ env.REPOSITORY }}/${{ inputs.distribution }}
           tags: ${{ inputs.qt_version == '6' && format('{0}-qt6', inputs.codename) || inputs.codename }}
