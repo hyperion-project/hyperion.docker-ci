@@ -8,9 +8,7 @@ FROM --platform=$BUILDPLATFORM debian:trixie-slim AS rootfs-builder
 ARG SUITE
 ARG BUILDPLATFORM
 
-RUN --security=insecure \
-    apt-get update; \
-    apt-get install -y --no-install-recommends ca-certificates debuerreotype debootstrap gnupg gpgv wget xz-utils qemu-user-static; \
+RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates debuerreotype debootstrap gnupg gpgv wget xz-utils qemu-user-static; \
     wget -O /tmp/raspbian.asc "https://archive.raspbian.org/raspbian.public.key"; \
     gpg --batch --no-default-keyring --keyring "/tmp/raspbian-archive-keyring.pgp" --import /tmp/raspbian.asc; \
     wget -O /tmp/Release.gpg "http://archive.raspbian.org/raspbian/dists/${SUITE}/Release.gpg"; \
@@ -48,11 +46,10 @@ RUN if [ "$SUITE" != "forky" ]; then \
 fi
 
 RUN if [ "$SUITE" = "bookworm" ] || [ "$SUITE" = "trixie" ] || [ "$SUITE" = "forky" ] && [ "$QT_VERSION" = "6" ]; then \
-    apt-get -y install qt6-base-dev libqt6sql6-sqlite qt6-serialport-dev qt6-websockets-dev \
-      libxkbcommon-dev libvulkan-dev libgl1-mesa-dev; \
+    apt-cache policy qt6-base-dev libqt6sql6-sqlite qt6-serialport-dev qt6-websockets-dev; \
+    apt-get -y install qt6-base-dev libqt6sql6-sqlite qt6-serialport-dev qt6-websockets-dev libxkbcommon-dev libvulkan-dev libgl1-mesa-dev; \
 else \
-    apt-get -y install qtbase5-dev libqt5serialport5-dev libqt5websockets5-dev \
-      libqt5sql5-sqlite libqt5svg5-dev; \
+    apt-get -y install qtbase5-dev libqt5serialport5-dev libqt5websockets5-dev libqt5sql5-sqlite libqt5svg5-dev; \
 fi
 
 RUN apt-get -y install \
