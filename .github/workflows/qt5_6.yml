@@ -59,36 +59,11 @@ jobs:
         uses: docker/setup-buildx-action@v3
         with:
           driver-opts: network=host
+          buildkitd-flags: --allow-insecure-entitlement security.insecure 
 
       - name: 🔧 Set up QEMU (armv6 only)
         if: ${{ matrix.target_platform == 'armv6' }}
         uses: docker/setup-qemu-action@v3
-
-      - name: 🍓 Build Raspbian base image (armv6 only)
-        if: ${{ matrix.target_platform == 'armv6' }}
-        run: |
-          sudo apt-get update && sudo apt-get install -y --no-install-recommends debuerreotype debootstrap gnupg qemu-user-static xz-utils
-
-          WORKDIR="$(mktemp -d /tmp/raspbian-build.XXXXXXXX)"
-
-          wget -O "${WORKDIR}/raspbian-archive-keyring.pgp.asc" "https://archive.raspbian.org/raspbian.public.key"
-          gpg --batch --no-default-keyring --keyring "/usr/share/keyrings/raspbian-archive-keyring.pgp" --import "${WORKDIR}/raspbian-archive-keyring.pgp.asc"
-
-          wget -O "${WORKDIR}/Release.gpg" "http://archive.raspbian.org/raspbian/dists/${{ inputs.codename }}/Release.gpg"
-          wget -O "${WORKDIR}/Release" "http://archive.raspbian.org/raspbian/dists/${{ inputs.codename }}/Release"
-          gpgv --keyring /usr/share/keyrings/raspbian-archive-keyring.pgp "${WORKDIR}/Release.gpg" "${WORKDIR}/Release"
-
-          sudo debuerreotype-init --arch "armhf" --non-debian --keyring "/usr/share/keyrings/raspbian-archive-keyring.pgp" "${WORKDIR}/rootfs" "${{ inputs.codename }}" "http://raspbian.raspberrypi.org/raspbian/"
-          sudo debuerreotype-minimizing-config "${WORKDIR}/rootfs"
-
-          sudo debuerreotype-tar "${WORKDIR}/rootfs" "${WORKDIR}/rootfs.tar.xz"
-          sudo chown "$(id -u):$(id -g)" "${WORKDIR}/rootfs.tar.xz"
-
-          xzcat "${WORKDIR}/rootfs.tar.xz" | docker import --platform "linux/arm/v6" --change 'CMD ["/bin/bash"]' - raspbian:${{ inputs.codename }}
-          docker image tag raspbian:${{ inputs.codename }} localhost:5000/raspbian:${{ inputs.codename }}
-          docker image push localhost:5000/raspbian:${{ inputs.codename }}
-
-          sudo rm -rf "${WORKDIR}"
 
       - name: 🐳 Set up Docker metadata
         id: meta
@@ -128,10 +103,10 @@ jobs:
           context: .
           file: ${{ matrix.target_platform == 'armv6' && 'debian-armv6' || inputs.distribution == 'fedora' && 'fedora' || 'ubuntu_debian' }}
           platforms: ${{ matrix.target_lookup[format('{0}',matrix.target_platform)] }}
+          allow: security.insecure
           labels: ${{ steps.meta.outputs.labels }}
           provenance: false
           outputs: type=image,name=ghcr.io/${{ env.REPOSITORY }}/${{ inputs.distribution }},push-by-digest=true,name-canonical=true,push=true
-          build-contexts: ${{ matrix.target_platform == 'armv6' && format('raspbian:{0}=docker-image://localhost:5000/raspbian:{0}', inputs.codename) || '' }}
           build-args: |
             DIST=${{ inputs.distribution }}
             SUITE=${{ inputs.codename }}

@@ -1,9 +1,27 @@
-ARG SUITE="bullseye"
-ARG QT_VERSION="6"
+ARG SUITE=bullseye
+ARG QT_VERSION=6
 ARG REPOSITORY="https://github.com/hyperion-project"
 ARG CMAKE_VERSION="3.28.3"
 
-FROM raspbian:${SUITE}
+FROM --platform=linux/amd64 debian:bookworm-slim AS rootfs-builder
+
+ARG SUITE
+
+RUN --security=insecure \
+    apt-get update && apt-get install -y --no-install-recommends debuerreotype debootstrap gnupg wget xz-utils qemu-user-static && \
+    wget -qO /tmp/raspbian.asc "https://archive.raspbian.org/raspbian.public.key" && \
+    gpg --batch --no-default-keyring --keyring "/usr/share/keyrings/raspbian-archive-keyring.pgp" --import /tmp/raspbian.asc && \
+    wget -qO /tmp/Release.gpg "http://archive.raspbian.org/raspbian/dists/${SUITE}/Release.gpg" && \
+    wget -qO /tmp/Release     "http://archive.raspbian.org/raspbian/dists/${SUITE}/Release"     && \
+    gpgv --keyring /usr/share/keyrings/raspbian-archive-keyring.pgp /tmp/Release.gpg /tmp/Release && \
+    debuerreotype-init --arch armhf --non-debian --keyring "/usr/share/keyrings/raspbian-archive-keyring.pgp" /rootfs "${SUITE}" "http://raspbian.raspberrypi.org/raspbian/" && \
+    debuerreotype-minimizing-config /rootfs
+
+FROM scratch AS raspbian-base
+COPY --from=rootfs-builder /rootfs /
+CMD ["/bin/bash"]
+
+FROM raspbian-base
 
 ARG SUITE
 ARG QT_VERSION
@@ -15,76 +33,50 @@ ARG TARGETPLATFORM
 ENV QEMU_EXECVE=1
 ENV TARGETPLATFORM=${TARGETPLATFORM:-linux/arm/v6}
 
-# update
 RUN apt-get update
 
-# adding raspberrypi repository
 RUN if [ "$SUITE" != "forky" ]; then \
     apt-get -y install --no-install-recommends ca-certificates curl gnupg; \
-    curl -fsSL https://github.com/raspberrypi/rpi-image-gen/raw/master/keydir/raspberrypi-archive-keyring.gpg | gpg --dearmor -o /usr/share/keyrings/raspberrypi-archive-keyring.gpg; \
-    echo "deb [signed-by=/usr/share/keyrings/raspberrypi-archive-keyring.gpg] http://archive.raspberrypi.org/debian/ ${SUITE} main" > /etc/apt/sources.list.d/raspi.list; \
+    curl -fsSL https://github.com/raspberrypi/rpi-image-gen/raw/master/keydir/raspberrypi-archive-keyring.gpg \
+      | gpg --dearmor -o /usr/share/keyrings/raspberrypi-archive-keyring.gpg; \
+    echo "deb [signed-by=/usr/share/keyrings/raspberrypi-archive-keyring.gpg] http://archive.raspberrypi.org/debian/ ${SUITE} main" \
+      > /etc/apt/sources.list.d/raspi.list; \
     apt-get update; \
 fi
 
-# install qt5 or qt6 (qt6 is not available on debian buster/bullseye)
 RUN if [ "$SUITE" = "bookworm" ] || [ "$SUITE" = "trixie" ] || [ "$SUITE" = "forky" ] && [ "$QT_VERSION" = "6" ]; then \
-    apt-get -y install qt6-base-dev libqt6sql6-sqlite qt6-serialport-dev qt6-websockets-dev libxkbcommon-dev libvulkan-dev libgl1-mesa-dev; \
+    apt-get -y install qt6-base-dev libqt6sql6-sqlite qt6-serialport-dev qt6-websockets-dev \
+      libxkbcommon-dev libvulkan-dev libgl1-mesa-dev; \
 else \
-    apt-get -y install qtbase5-dev libqt5serialport5-dev libqt5websockets5-dev libqt5sql5-sqlite libqt5svg5-dev; \
+    apt-get -y install qtbase5-dev libqt5serialport5-dev libqt5websockets5-dev \
+      libqt5sql5-sqlite libqt5svg5-dev; \
 fi
 
-# install deps
 RUN apt-get -y install \
-    devscripts \
-    fakeroot \
-    debhelper \
-    libdistro-info-perl \
-    git \
-    python3-dev \
-    build-essential \
-    ninja-build \
-    libusb-1.0-0-dev \
-    libcec-dev \
-    libp8-platform-dev \
-    libudev-dev \
-    libavahi-core-dev \
-    libavahi-compat-libdnssd-dev \
-    zlib1g-dev \
-    libasound2-dev \
-    libjpeg-dev \
-    libturbojpeg0-dev \
-    libmbedtls-dev \
-    libftdi1-dev \
-    libssl-dev \
-    libglib2.0-dev \
-    libdrm-dev
+    devscripts fakeroot debhelper libdistro-info-perl git python3-dev \
+    build-essential ninja-build libusb-1.0-0-dev libcec-dev libp8-platform-dev \
+    libudev-dev libavahi-core-dev libavahi-compat-libdnssd-dev zlib1g-dev \
+    libasound2-dev libjpeg-dev libturbojpeg0-dev libmbedtls-dev libftdi1-dev \
+    libssl-dev libglib2.0-dev libdrm-dev
 
 RUN if [ "$SUITE" != "trixie" ] && [ "$SUITE" != "forky" ]; then \
     apt-get -y install --no-install-recommends libraspberrypi-dev; \
 fi
-    
-# Mark /source as safe directory for git (used in CI mounts)
+
 RUN git config --system --add safe.directory /source
 
-# Compile and install CMake
 ENV CMAKE_URL="https://github.com/Kitware/CMake/releases/download/v${CMAKE_VERSION}/cmake-${CMAKE_VERSION}"
-RUN mkdir -p /tmp/cmake; \
-    cd /tmp/cmake; \
-    curl -kL ${CMAKE_URL}.tar.gz | tar zxf - -C . --strip-components 1; \
-    sed -i -e 's/|aarch64//g' Source/Checks/cm_cxx_features.cmake; \
-    ./bootstrap --prefix=/usr --parallel=`nproc`; \
-    make -j `nproc`; \
-    make install; \
+RUN mkdir -p /tmp/cmake && cd /tmp/cmake && \
+    curl -kL ${CMAKE_URL}.tar.gz | tar zxf - -C . --strip-components 1 && \
+    sed -i -e 's/|aarch64//g' Source/Checks/cm_cxx_features.cmake && \
+    ./bootstrap --prefix=/usr --parallel=$(nproc) && \
+    make -j$(nproc) && make install && \
     cd && rm -rf /tmp/cmake
 
-# Show cmake version
 RUN cmake --version
 
-# download qemu and set exec flag
-RUN curl -kL https://github.com/balena-io/qemu/releases/download/v7.0.0%2Bbalena1/qemu-7.0.0.balena1-arm.tar.gz | tar zxvf - -C . --strip-components 1 && mv qemu-arm-static /usr/bin/qemu-static
-
-# set qemu exec flag
+RUN curl -kL https://github.com/balena-io/qemu/releases/download/v7.0.0%2Bbalena1/qemu-7.0.0.balena1-arm.tar.gz \
+    | tar zxvf - -C . --strip-components 1 && mv qemu-arm-static /usr/bin/qemu-static
 RUN chmod +x /usr/bin/qemu-static
 
-# set entrypoint
-ENTRYPOINT [ "/usr/bin/qemu-static" ]
+ENTRYPOINT ["/usr/bin/qemu-static"]
