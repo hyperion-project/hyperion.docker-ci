@@ -33,7 +33,7 @@ ARG BUILDPLATFORM
 
 RUN --security=insecure \
     apt-get update; \
-    apt-get install -y --no-install-recommends debuerreotype debootstrap gnupg wget xz-utils qemu-user-static; \
+    apt-get install -y --no-install-recommends ca-certificates debuerreotype debootstrap gnupg wget xz-utils qemu-user-static; \
     wget -O /tmp/raspbian.asc "https://archive.raspbian.org/raspbian.public.key"; \
     gpg --batch --no-default-keyring --keyring "/tmp/raspbian-archive-keyring.pgp" --import /tmp/raspbian.asc; \
     wget -O /tmp/Release.gpg "http://archive.raspbian.org/raspbian/dists/${SUITE}/Release.gpg"; \
