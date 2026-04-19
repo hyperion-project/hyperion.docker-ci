@@ -11,16 +11,16 @@ ARG BUILDPLATFORM
 RUN --security=insecure \
     apt-get update \
     apt-get install -y --no-install-recommends debuerreotype debootstrap gnupg wget xz-utils qemu-user-static \
-    wget -qO /tmp/raspbian.asc "https://archive.raspbian.org/raspbian.public.key" \
+    wget -O /tmp/raspbian.asc "https://archive.raspbian.org/raspbian.public.key" \
     gpg --batch --no-default-keyring --keyring "/usr/share/keyrings/raspbian-archive-keyring.pgp" --import /tmp/raspbian.asc \
-    wget -qO /tmp/Release.gpg "http://archive.raspbian.org/raspbian/dists/${SUITE}/Release.gpg" \
-    wget -qO /tmp/Release     "http://archive.raspbian.org/raspbian/dists/${SUITE}/Release" \
+    wget -O /tmp/Release.gpg "http://archive.raspbian.org/raspbian/dists/${SUITE}/Release.gpg" \
+    wget -O /tmp/Release     "http://archive.raspbian.org/raspbian/dists/${SUITE}/Release" \
     gpgv --keyring /usr/share/keyrings/raspbian-archive-keyring.pgp /tmp/Release.gpg /tmp/Release \
-    debuerreotype-init --arch armhf --non-debian --keyring "/usr/share/keyrings/raspbian-archive-keyring.pgp" /rootfs "${SUITE}" "http://raspbian.raspberrypi.org/raspbian/" \
-    debuerreotype-minimizing-config /rootfs
+    debuerreotype-init --arch "armhf" --non-debian --keyring "/usr/share/keyrings/raspbian-archive-keyring.pgp" /tmp/rootfs "${SUITE}" "http://raspbian.raspberrypi.org/raspbian/" \
+    debuerreotype-minimizing-config /tmp/rootfs
 
 FROM scratch AS raspbian-base
-COPY --from=rootfs-builder /rootfs /
+COPY --from=rootfs-builder /tmp/rootfs /
 CMD ["/bin/bash"]
 
 FROM raspbian-base
