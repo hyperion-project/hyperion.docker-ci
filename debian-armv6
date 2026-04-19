@@ -3,33 +3,10 @@ ARG QT_VERSION=6
 ARG REPOSITORY="https://github.com/hyperion-project"
 ARG CMAKE_VERSION="3.28.3"
 
-FROM --platform=$BUILDPLATFORM debian:bookworm-slim AS rootfs-builder
+FROM --platform=$BUILDPLATFORM debian:trixie-slim AS rootfs-builder
 
 ARG SUITE
 ARG BUILDPLATFORM
-
-# sudo apt-get update && sudo apt-get install -y --no-install-recommends debuerreotype debootstrap gnupg qemu-user-static xz-utils
-
-# WORKDIR="$(mktemp -d /tmp/raspbian-build.XXXXXXXX)"
-
-# wget -O "${WORKDIR}/raspbian-archive-keyring.pgp.asc" "https://archive.raspbian.org/raspbian.public.key"
-# gpg --batch --no-default-keyring --keyring "/usr/share/keyrings/raspbian-archive-keyring.pgp" --import "${WORKDIR}/raspbian-archive-keyring.pgp.asc"
-
-# wget -O "${WORKDIR}/Release.gpg" "http://archive.raspbian.org/raspbian/dists/${{ inputs.codename }}/Release.gpg"
-# wget -O "${WORKDIR}/Release" "http://archive.raspbian.org/raspbian/dists/${{ inputs.codename }}/Release"
-# gpgv --keyring /usr/share/keyrings/raspbian-archive-keyring.pgp "${WORKDIR}/Release.gpg" "${WORKDIR}/Release"
-
-# sudo debuerreotype-init --arch "armhf" --non-debian --keyring "/usr/share/keyrings/raspbian-archive-keyring.pgp" "${WORKDIR}/rootfs" "${{ inputs.codename }}" "http://raspbian.raspberrypi.org/raspbian/"
-# sudo debuerreotype-minimizing-config "${WORKDIR}/rootfs"
-
-# sudo debuerreotype-tar "${WORKDIR}/rootfs" "${WORKDIR}/rootfs.tar.xz"
-# sudo chown "$(id -u):$(id -g)" "${WORKDIR}/rootfs.tar.xz"
-
-# xzcat "${WORKDIR}/rootfs.tar.xz" | docker import --platform "linux/arm/v6" --change 'CMD ["/bin/bash"]' - raspbian:${{ inputs.codename }}
-# docker image tag raspbian:${{ inputs.codename }} localhost:5000/raspbian:${{ inputs.codename }}
-# docker image push localhost:5000/raspbian:${{ inputs.codename }}
-
-# sudo rm -rf "${WORKDIR}"
 
 RUN --security=insecure \
     apt-get update; \
