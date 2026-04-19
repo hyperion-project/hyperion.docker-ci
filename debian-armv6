@@ -3,9 +3,10 @@ ARG QT_VERSION=6
 ARG REPOSITORY="https://github.com/hyperion-project"
 ARG CMAKE_VERSION="3.28.3"
 
-FROM --platform=linux/amd64 debian:bookworm-slim AS rootfs-builder
+FROM --platform=$BUILDPLATFORM debian:bookworm-slim AS rootfs-builder
 
 ARG SUITE
+ARG BUILDPLATFORM
 
 RUN --security=insecure \
     apt-get update && apt-get install -y --no-install-recommends debuerreotype debootstrap gnupg wget xz-utils qemu-user-static && \
