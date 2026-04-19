@@ -1,16 +1,14 @@
+# Default values for build arguments
 ARG SUITE=bullseye
 ARG QT_VERSION=6
-ARG REPOSITORY="https://github.com/hyperion-project"
 ARG CMAKE_VERSION="3.28.3"
 
-FROM --platform=$BUILDPLATFORM debian:${SUITE}-slim AS rootfs-builder
-
+# Base image with the Raspbian rootfs
+FROM --platform=$BUILDPLATFORM debian:${SUITE}-slim AS raspbian-base
 ARG SUITE
-ARG BUILDPLATFORM
 
 RUN --security=insecure \
-    apt-get update; \
-    apt-get install -y --no-install-recommends ca-certificates debuerreotype debootstrap gnupg gpgv wget xz-utils qemu-user-static; \
+    apt-get update && apt-get install -y --no-install-recommends ca-certificates debuerreotype debootstrap gnupg gpgv wget xz-utils qemu-user-static; \
     wget -O /tmp/raspbian.asc "https://archive.raspbian.org/raspbian.public.key"; \
     gpg --batch --no-default-keyring --keyring "/tmp/raspbian-archive-keyring.pgp" --import /tmp/raspbian.asc; \
     wget -O /tmp/Release.gpg "http://archive.raspbian.org/raspbian/dists/${SUITE}/Release.gpg"; \
@@ -20,27 +18,19 @@ RUN --security=insecure \
     debuerreotype-init --arch "armhf" --non-debian --keyring "/usr/share/keyrings/raspbian-archive-keyring.pgp" /tmp/rootfs "${SUITE}" "http://raspbian.raspberrypi.org/raspbian/"; \
     debuerreotype-minimizing-config /tmp/rootfs
 
-FROM scratch AS raspbian-base
-COPY --from=rootfs-builder /tmp/rootfs /
-CMD ["/bin/bash"]
-
-FROM raspbian-base
+# Final image
+FROM scratch
+COPY --from=raspbian-base /tmp/rootfs /
 
 ARG SUITE
 ARG QT_VERSION
-ARG REPOSITORY
 ARG CMAKE_VERSION
 ARG DEBIAN_FRONTEND=noninteractive
-ARG TARGETPLATFORM
 
 ENV QEMU_EXECVE=1
-ENV TARGETPLATFORM=${TARGETPLATFORM:-linux/arm/v6}
-
-# update
-RUN apt-get update
 
 # adding raspberrypi repository
-RUN apt-get -y install --no-install-recommends ca-certificates curl gnupg; \
+RUN apt-get update && apt-get -y install --no-install-recommends ca-certificates curl gnupg; \
     curl -fsSL https://github.com/raspberrypi/rpi-image-gen/raw/master/keydir/raspberrypi-archive-keyring.gpg | gpg --dearmor -o /usr/share/keyrings/raspberrypi-archive-keyring.gpg; \
     echo "deb [signed-by=/usr/share/keyrings/raspberrypi-archive-keyring.gpg] http://archive.raspberrypi.org/debian/ ${SUITE} main" > /etc/apt/sources.list.d/raspi.list; \
     apt-get update
