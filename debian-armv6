@@ -36,7 +36,7 @@ RUN apt-get update && apt-get -y install --no-install-recommends ca-certificates
     apt-get update
 
 # install qt5 or qt6 (qt6 is not available on debian buster/bullseye)
-RUN if [ "$SUITE" = "bookworm" ] || [ "$SUITE" = "trixie" ] && [ "$QT_VERSION" = "6" ]; then \
+RUN if ([ "$SUITE" = "bookworm" ] || [ "$SUITE" = "trixie" ] || [ "$SUITE" = "forky" ]) && [ "$QT_VERSION" = "6" ]; then \
     apt-get -y install qt6-base-dev libqt6sql6-sqlite qt6-serialport-dev qt6-websockets-dev libxkbcommon-dev libvulkan-dev libgl1-mesa-dev; \
 else \
     apt-get -y install qtbase5-dev libqt5serialport5-dev libqt5websockets5-dev libqt5sql5-sqlite libqt5svg5-dev; \
@@ -68,7 +68,7 @@ RUN apt-get -y install \
     libglib2.0-dev \
     libdrm-dev
 
-RUN if [ "$SUITE" != "trixie" ]; then \
+RUN if [ "$SUITE" != "trixie" ] && [ "$SUITE" != "forky" ]; then \
     apt-get -y install --no-install-recommends libraspberrypi-dev; \
 fi
     
