@@ -30,7 +30,7 @@ jobs:
 
   build_and_push:
     name: 👷 Build ${{ matrix.target_platform }}
-    runs-on: ${{ matrix.target_platform == 'amd64' && 'ubuntu-22.04' || 'ubuntu-22.04-arm' }}
+    runs-on: ${{ matrix.target_platform == 'amd64' && 'ubuntu-24.04' || 'ubuntu-24.04-arm' }}
     strategy:
       fail-fast: false
       matrix:
@@ -91,6 +91,7 @@ jobs:
           context: .
           file: ${{ matrix.target_platform == 'armv6' && 'debian-armv6' || inputs.distribution == 'fedora' && 'fedora' || 'ubuntu_debian' }}
           platforms: ${{ matrix.target_lookup[format('{0}',matrix.target_platform)] }}
+          allow: security.insecure
           labels: ${{ steps.meta.outputs.labels }}
           provenance: false
           outputs: type=image,name=ghcr.io/${{ env.REPOSITORY }}/${{ inputs.distribution }},push-by-digest=true,name-canonical=true,push=true
