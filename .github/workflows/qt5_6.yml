@@ -91,6 +91,7 @@ jobs:
           context: .
           file: ${{ matrix.target_platform == 'armv6' && 'debian-armv6' || inputs.distribution == 'fedora' && 'fedora' || 'ubuntu_debian' }}
           platforms: ${{ matrix.target_lookup[format('{0}',matrix.target_platform)] }}
+          allow: security.insecure
           labels: ${{ steps.meta.outputs.labels }}
           provenance: false
           outputs: type=image,name=ghcr.io/${{ env.REPOSITORY }}/${{ inputs.distribution }},push-by-digest=true,name-canonical=true,push=true
