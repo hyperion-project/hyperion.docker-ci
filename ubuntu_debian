@@ -62,7 +62,9 @@ RUN apt-get -y install \
     libftdi1-dev \
     libssl-dev \
     libglib2.0-dev \
-    libdrm-dev
+    libdrm-dev \
+    libpipewire-0.3 \
+    libspa-0.2-dev    
 
 # Mark /source as safe directory for git (used in CI mounts)
 RUN git config --system --add safe.directory /source
