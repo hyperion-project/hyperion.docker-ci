@@ -48,6 +48,8 @@ RUN apt-get -y install \
     python3-dev \
     build-essential \
     ninja-build \
+    python3-jsonschema \
+    python3-jinja2 \    
     libusb-1.0-0-dev \
     libcec-dev \
     libp8-platform-dev \
