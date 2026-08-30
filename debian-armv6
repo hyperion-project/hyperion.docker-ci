@@ -67,7 +67,7 @@ RUN apt-get -y install \
     libssl-dev \
     libglib2.0-dev \
     libdrm-dev \
-    libpipewire-0.3 \
+    libpipewire-0.3-dev \
     libspa-0.2-dev
 
 RUN if [ "$SUITE" != "trixie" ] && [ "$SUITE" != "forky" ]; then \
