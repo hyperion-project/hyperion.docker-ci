@@ -22,7 +22,7 @@ jobs:
     name: Build QEMU
     runs-on: ubuntu-24.04-arm
     outputs:
-      version: ${{ steps.check.outputs.version }}
+      version: ${{ env.QEMU_VERSION }}
     steps:
       - name: 👀 Checkout
         uses: actions/checkout@v7
@@ -44,15 +44,7 @@ jobs:
 
       - name: 🔍 Check if image already exists
         id: check
-        run: |
-          if docker buildx imagetools inspect ghcr.io/${{ env.REPOSITORY }}/qemu:${{ env.QEMU_VERSION }} > /dev/null 2>&1; then
-            echo "exists=true" >> ${GITHUB_OUTPUT}
-            echo "version=${{ env.QEMU_VERSION }}" >> ${GITHUB_OUTPUT}
-          elif [ "${{ github.event_name }}" = "pull_request" ]; then
-            echo "version=pr-${{ github.event.number }}" >> ${GITHUB_OUTPUT}
-          else
-            echo "version=${{ env.QEMU_VERSION }}" >> ${GITHUB_OUTPUT}
-          fi
+        run: docker buildx imagetools inspect ghcr.io/${{ env.REPOSITORY }}/qemu:${{ env.QEMU_VERSION }} > /dev/null 2>&1 && echo "exists=true" >> ${GITHUB_OUTPUT} || true
 
       - name: 👷 Build and 🚀 Push to GitHub Container/Package Registry
         if: ${{ steps.check.outputs.exists != 'true' }}
@@ -61,8 +53,9 @@ jobs:
           context: ./qemu
           platforms: linux/amd64,linux/arm64,linux/arm/v6,linux/arm/v7
           allow: security.insecure
-          push: ${{ github.event_name != 'pull_request' }}
-          tags: ghcr.io/${{ env.REPOSITORY }}/qemu:${{ steps.check.outputs.version }}
+          provenance: false
+          push: true
+          tags: ghcr.io/${{ env.REPOSITORY }}/qemu:${{ env.QEMU_VERSION }}
           labels: org.opencontainers.image.source=https://github.com/${{ env.REPOSITORY }}
           build-args: |
             QEMU_VERSION=${{ env.QEMU_VERSION }}
@@ -71,7 +64,7 @@ jobs:
     name: Build CMake
     runs-on: ubuntu-24.04-arm
     outputs:
-      version: ${{ steps.check.outputs.version }}
+      version: ${{ env.CMAKE_VERSION }}
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -93,15 +86,7 @@ jobs:
 
       - name: 🔍 Check if image already exists
         id: check
-        run: |
-          if docker buildx imagetools inspect ghcr.io/${{ env.REPOSITORY }}/cmake:${{ env.CMAKE_VERSION }} > /dev/null 2>&1; then
-            echo "exists=true" >> ${GITHUB_OUTPUT}
-            echo "version=${{ env.CMAKE_VERSION }}" >> ${GITHUB_OUTPUT}
-          elif [ "${{ github.event_name }}" = "pull_request" ]; then
-            echo "version=pr-${{ github.event.number }}" >> ${GITHUB_OUTPUT}
-          else
-            echo "version=${{ env.CMAKE_VERSION }}" >> ${GITHUB_OUTPUT}
-          fi
+        run: docker buildx imagetools inspect ghcr.io/${{ env.REPOSITORY }}/cmake:${{ env.CMAKE_VERSION }} > /dev/null 2>&1 && echo "exists=true" >> ${GITHUB_OUTPUT} || true
 
       - name: 👷 Build and 🚀 Push to GitHub Container/Package Registry
         if: ${{ steps.check.outputs.exists != 'true' }}
@@ -111,8 +96,9 @@ jobs:
           file: ./cmake/Dockerfile
           platforms: linux/amd64,linux/arm64,linux/arm/v6,linux/arm/v7
           allow: security.insecure
-          push: ${{ github.event_name != 'pull_request' }}
-          tags: ghcr.io/${{ env.REPOSITORY }}/cmake:${{ steps.check.outputs.version }}
+          provenance: false
+          push: true
+          tags: ghcr.io/${{ env.REPOSITORY }}/cmake:${{ env.CMAKE_VERSION }}
           labels: org.opencontainers.image.source=https://github.com/${{ env.REPOSITORY }}
           build-args: |
             CMAKE_VERSION=${{ env.CMAKE_VERSION }}
@@ -158,7 +144,7 @@ jobs:
   cleanup:
     name: 🧹 Cleanup untagged images
     needs: [ build_qemu, build_cmake, ubuntu_debian_fedora ]
-    if: ${{ needs.ubuntu_debian_fedora.result == 'success' && github.event_name != 'pull_request' }}
+    if: ${{ needs.ubuntu_debian_fedora.result == 'success' }}
     env:
       SECRET_DOCKER_CI: ${{ secrets.DOCKER_CI }}
     runs-on: ubuntu-latest
@@ -182,7 +168,7 @@ jobs:
           packages: ".*"
           expand-packages: true
           use-regex: true
-          delete-tags: '^(\d+\.\d+\.\d+|pr-\d+)$'
+          delete-tags: '^\d+\.\d+\.\d+$'
           exclude-tags: '^(${{ needs.build_cmake.outputs.version }}|${{ needs.build_qemu.outputs.version }})$'
           delete-untagged: true
           delete-partial-images: true
