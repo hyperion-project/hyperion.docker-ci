@@ -33,10 +33,10 @@ RUN if [ "${TARGETARCH}" != "amd64" ]; then \
           zlib1g-dev && \
      case "${TARGETARCH}${TARGETVARIANT}" in \
           armv6|armv7) \
-               TARGETS="arm-linux-user" \
+               TARGETS="arm-linux-user"; BIN="qemu-arm" \
                ;; \
           arm64) \
-               TARGETS="aarch64-linux-user" \
+               TARGETS="aarch64-linux-user"; BIN="qemu-aarch64" \
                ;; \
           *) exit 1 ;; \
      esac && \
@@ -61,11 +61,9 @@ RUN if [ "${TARGETARCH}" != "amd64" ]; then \
           --disable-download && \
      ninja -j"$(nproc)" && \
      mkdir -p /out && \
-     if [ -x "/build/${TARGETS}" ]; then \
-          ${CROSS_PREFIX}strip -o "/out/${TARGETS}" "/build/${TARGETS}"; \
-          cp "/out/${TARGETS}" "/out/qemu-static"; \
-     fi && \
-     test -n "$(ls -A /out)"; \
+     test -x "/build/${BIN}" && \
+     ${CROSS_PREFIX}strip -o "/out/qemu-static" "/build/${BIN}" && \
+     test -x /out/qemu-static; \
 fi
 
 FROM scratch AS qemu
