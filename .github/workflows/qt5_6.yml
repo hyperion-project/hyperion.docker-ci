@@ -20,11 +20,16 @@ on:
         type: string
         default: "['amd64']"
         required: false
+      qemu_version:
+        type: string
+        required: true
+      cmake_version:
+        type: string
+        required: true
 
 env:
   SECRET_DOCKER_CI: ${{ secrets.DOCKER_CI }}
   REPOSITORY: hyperion-project
-  CMAKE_VERSION: 3.31.6
 
 jobs:
 
@@ -36,11 +41,6 @@ jobs:
       matrix:
         target_platform: ${{ fromJson(inputs.target_platform) }}
         target_lookup: [{ 'amd64': 'linux/amd64', 'arm64': 'linux/arm64', 'armv6': 'linux/arm/v6', 'armv7': 'linux/arm/v7' }]
-        isBullseyeQt6:
-          - ${{ inputs.distribution == 'debian' && inputs.codename == 'bullseye' && inputs.qt_version == '6' }}
-        exclude:
-          - isBullseyeQt6: true
-            target_platform: 'armv6'
 
     steps:
       - name: 👀 Checkout
@@ -99,8 +99,9 @@ jobs:
             DIST=${{ inputs.distribution }}
             SUITE=${{ inputs.codename }}
             QT_VERSION=${{ inputs.qt_version }}
-            REPOSITORY="${{ github.server_url }}/${{ env.REPOSITORY }}"
-            CMAKE_VERSION=${{ env.CMAKE_VERSION }}
+            REPOSITORY=${{ env.REPOSITORY }}
+            QEMU_VERSION=${{ inputs.qemu_version }}
+            CMAKE_VERSION=${{ inputs.cmake_version }}
 
       - name: ⬇ Export digest
         run: |

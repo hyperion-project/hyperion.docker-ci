@@ -1,21 +1,22 @@
 ARG DIST="debian"
-ARG SUITE="bullseye"
-ARG QT_VERSION="6"
-ARG REPOSITORY="https://github.com/hyperion-project"
+ARG SUITE="bookworm"
+ARG QT_VERSION=6
+ARG REPOSITORY="hyperion-project"
+ARG QEMU_VERSION="11.1.1"
 ARG CMAKE_VERSION="3.28.3"
 ARG DEBIAN_FRONTEND=noninteractive
+
+FROM ghcr.io/${REPOSITORY}/qemu:${QEMU_VERSION} AS qemu-bin
+FROM ghcr.io/${REPOSITORY}/cmake:${CMAKE_VERSION} AS cmake-bin
 
 FROM ${DIST}:${SUITE}
 
 ARG DIST
 ARG SUITE
 ARG QT_VERSION
-ARG REPOSITORY
-ARG CMAKE_VERSION
 ARG DEBIAN_FRONTEND
 ARG TARGETPLATFORM
 
-ENV QEMU_EXECVE=1
 ENV TARGETPLATFORM=${TARGETPLATFORM:-linux/amd64}
 ENV DEBFULLNAME="Hyperion Project"
 ENV DEBEMAIL="admin@hyperion-project.org"
@@ -23,13 +24,8 @@ ENV DEBEMAIL="admin@hyperion-project.org"
 # update
 RUN apt-get update
 
-# install qt5 or qt6 (qt6 is not available on ubuntu focal and debian buster)
-# on debian bullseye add backports to install qt6
-RUN if [ "$SUITE" != "buster" ] && [ "$SUITE" != "focal" ] && [ "$QT_VERSION" = "6" ]; then \
-    if [ "$SUITE" = "bullseye" ]; then \
-        echo "deb http://archive.debian.org/debian bullseye-backports main contrib non-free" | tee -a /etc/apt/sources.list; \
-        apt-get update; \
-    fi; \
+# install qt5 or qt6
+RUN if [ "$QT_VERSION" = "6" ]; then \
     if [ "$SUITE" = "jammy" ]; then SERIALPORT="libqt6serialport6-dev"; else SERIALPORT="qt6-serialport-dev"; fi; \
     if [ "$SUITE" = "jammy" ]; then WEBSOCKETS="libqt6websockets6-dev"; else WEBSOCKETS="qt6-websockets-dev"; fi; \
     apt-get -y install qt6-base-dev $SERIALPORT $WEBSOCKETS libqt6sql6-sqlite libxkbcommon-dev libvulkan-dev libgl1-mesa-dev; \
@@ -49,7 +45,7 @@ RUN apt-get -y install \
     build-essential \
     ninja-build \
     python3-jsonschema \
-    python3-jinja2 \    
+    python3-jinja2 \
     libusb-1.0-0-dev \
     libcec-dev \
     libp8-platform-dev \
@@ -86,46 +82,13 @@ elif [ "$TARGETPLATFORM" = "linux/arm64" ] || [ "$TARGETPLATFORM" = "linux/arm/v
     rm /etc/apt/sources.list.d/raspi.list; \
 fi
 
-# Install CMake on amd64 and arm64
-# Compile and install CMake on armv7
-ENV CMAKE_URL="https://github.com/Kitware/CMake/releases/download/v${CMAKE_VERSION}/cmake-${CMAKE_VERSION}"
-RUN if [ "$TARGETPLATFORM" = "linux/amd64" ]; then \
-    curl -OLs ${CMAKE_URL}-linux-x86_64.sh; \
-    chmod +x cmake-${CMAKE_VERSION}-linux-x86_64.sh; \
-    ./cmake-${CMAKE_VERSION}-linux-x86_64.sh --skip-license --prefix="/usr"; \
-    rm -rf cmake-${CMAKE_VERSION}-linux-x86_64.sh; \
-elif [ "$TARGETPLATFORM" = "linux/arm64" ]; then \
-    curl -OLs ${CMAKE_URL}-linux-aarch64.sh; \
-    chmod +x cmake-${CMAKE_VERSION}-linux-aarch64.sh; \
-    ./cmake-${CMAKE_VERSION}-linux-aarch64.sh --skip-license --prefix="/usr"; \
-    rm -rf cmake-${CMAKE_VERSION}-linux-aarch64.sh; \
-else \
-    mkdir -p /tmp/cmake; \
-    cd /tmp/cmake; \
-    curl -kL ${CMAKE_URL}.tar.gz | tar zxf - -C . --strip-components 1; \
-    ./bootstrap --prefix=/usr; --parallel=`nproc`; \
-    make -j `nproc`; \
-    make install; \
-    cd && rm -rf /tmp/cmake; \
-fi
+# Install CMake
+RUN --mount=type=bind,from=cmake-bin,source=/cmake,target=/mnt/cmake sh /mnt/cmake/cmake-*.sh --skip-license --prefix=/usr --exclude-subdir
 
 # Show cmake version
-RUN cmake --version 
+RUN cmake --version
 
-# download qemu
-RUN if [ "$TARGETPLATFORM" = "linux/arm64" ]; then \
-    curl -kL https://github.com/balena-io/qemu/releases/download/v7.0.0%2Bbalena1/qemu-7.0.0.balena1-aarch64.tar.gz | tar zxvf - -C . --strip-components 1 && mv qemu-aarch64-static /usr/bin/qemu-static; \
-elif [ "$TARGETPLATFORM" = "linux/arm/v6" ] || [ "$TARGETPLATFORM" = "linux/arm/v7" ]; then \
-    curl -kL https://github.com/balena-io/qemu/releases/download/v7.0.0%2Bbalena1/qemu-7.0.0.balena1-arm.tar.gz | tar zxvf - -C . --strip-components 1 && mv qemu-arm-static /usr/bin/qemu-static; \
-else \
-    printf '#!/bin/bash\nexec "$@"' > /usr/bin/qemu-static; \
-fi
-
-# set qemu exec flag
-RUN chmod +x /usr/bin/qemu-static
-
-# cleanup
-RUN apt-get clean -q -y && apt-get autoremove -y && rm -rf /var/lib/apt/lists/*
-
-# set entrypoint
+# Copy qemu and set QEMU_EXECVE / ENTRYPOINT
+COPY --from=qemu-bin /qemu/qemu-static /usr/bin/qemu-static
+ENV QEMU_EXECVE=/usr/bin/qemu-static
 ENTRYPOINT [ "/usr/bin/qemu-static" ]

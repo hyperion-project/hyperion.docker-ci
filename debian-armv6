@@ -1,22 +1,31 @@
 # Default values for build arguments
-ARG SUITE=bullseye
+ARG SUITE=bookworm
 ARG QT_VERSION=6
+ARG REPOSITORY="hyperion-project"
+ARG QEMU_VERSION="11.1.1"
 ARG CMAKE_VERSION="3.28.3"
+
+FROM ghcr.io/${REPOSITORY}/qemu:${QEMU_VERSION} AS qemu-bin
+FROM ghcr.io/${REPOSITORY}/cmake:${CMAKE_VERSION} AS cmake-bin
 
 # Base image with the Raspbian rootfs
 FROM --platform=$BUILDPLATFORM debian:${SUITE}-slim AS raspbian-base
+
 ARG SUITE
 
 RUN --security=insecure \
-    apt-get update && apt-get install -y --no-install-recommends ca-certificates debuerreotype debootstrap gnupg gpgv wget xz-utils qemu-user-static; \
-    wget -O /tmp/raspbian.asc "https://archive.raspbian.org/raspbian.public.key"; \
-    gpg --batch --no-default-keyring --keyring "/tmp/raspbian-archive-keyring.pgp" --import /tmp/raspbian.asc; \
-    wget -O /tmp/Release.gpg "http://archive.raspbian.org/raspbian/dists/${SUITE}/Release.gpg"; \
-    wget -O /tmp/Release     "http://archive.raspbian.org/raspbian/dists/${SUITE}/Release"; \
-    gpgv --keyring /tmp/raspbian-archive-keyring.pgp /tmp/Release.gpg /tmp/Release; \
-    cp /tmp/raspbian-archive-keyring.pgp /usr/share/keyrings/raspbian-archive-keyring.pgp; \
-    debuerreotype-init --arch "armhf" --non-debian --keyring "/usr/share/keyrings/raspbian-archive-keyring.pgp" /tmp/rootfs "${SUITE}" "http://raspbian.raspberrypi.org/raspbian/"; \
-    debuerreotype-minimizing-config /tmp/rootfs
+    apt-get update && apt-get install -y --no-install-recommends ca-certificates curl gpgv xz-utils debootstrap qemu-user-static && \
+    curl -fsSL "https://archive.raspbian.org/raspbian/pool/main/r/raspbian-archive-keyring/raspbian-archive-keyring_20120528.4_all.deb" -o /tmp/r.deb && \
+    dpkg-deb -x /tmp/r.deb /tmp/r-key && \
+    curl -fsSL "https://archive.raspberrypi.org/debian/pool/main/r/raspberrypi-archive-keyring/raspberrypi-archive-keyring_2025.1+rpt1_all.deb" -o /tmp/p.deb && \
+    dpkg-deb -x /tmp/p.deb /tmp/p-key && \
+    STAGING_SUITES=$(curl -fsSL "http://archive.raspbian.org/raspbian/dists/${SUITE}/Release" -o /tmp/release && { grep -qx "Suite: testing" /tmp/release && echo "--extra-suites=${SUITE}-staging" || true; }) && \
+    debootstrap --keyring=/tmp/r-key/usr/share/keyrings/raspbian-archive-keyring.gpg --arch="armhf" --variant="minbase" ${STAGING_SUITES} "${SUITE}" /tmp/rootfs "http://archive.raspbian.org/raspbian/" && \
+    install -D -m644 /tmp/r-key/usr/share/keyrings/raspbian-archive-keyring.gpg /tmp/rootfs/etc/apt/trusted.gpg.d/raspbian-archive-keyring.gpg && \
+    install -D -m644 /tmp/p-key/usr/share/keyrings/raspberrypi-archive-keyring.gpg /tmp/rootfs/usr/share/keyrings/raspberrypi-archive-keyring.gpg && \
+    echo "deb [signed-by=/usr/share/keyrings/raspberrypi-archive-keyring.gpg] http://archive.raspberrypi.org/debian/ ${SUITE} main" > /tmp/rootfs/etc/apt/sources.list.d/raspi.list && \
+    chroot /tmp/rootfs apt-get update && \
+    rm -rf /tmp/r.deb /tmp/p.deb /tmp/r-key /tmp/p-key
 
 # Final image
 FROM scratch
@@ -24,16 +33,7 @@ COPY --from=raspbian-base /tmp/rootfs /
 
 ARG SUITE
 ARG QT_VERSION
-ARG CMAKE_VERSION
 ARG DEBIAN_FRONTEND=noninteractive
-
-ENV QEMU_EXECVE=1
-
-# adding raspberrypi repository
-RUN apt-get update && apt-get -y install --no-install-recommends ca-certificates curl gnupg; \
-    curl -fsSL https://github.com/raspberrypi/rpi-image-gen/raw/master/keydir/raspberrypi-archive-keyring.gpg | gpg --dearmor -o /usr/share/keyrings/raspberrypi-archive-keyring.gpg; \
-    echo "deb [signed-by=/usr/share/keyrings/raspberrypi-archive-keyring.gpg] http://archive.raspberrypi.org/debian/ ${SUITE} main" > /etc/apt/sources.list.d/raspi.list; \
-    apt-get update
 
 # install qt5 or qt6 (qt6 is not available on debian buster/bullseye)
 RUN if ([ "$SUITE" = "bookworm" ] || [ "$SUITE" = "trixie" ] || [ "$SUITE" = "forky" ]) && [ "$QT_VERSION" = "6" ]; then \
@@ -79,25 +79,13 @@ fi
 # Mark /source as safe directory for git (used in CI mounts)
 RUN git config --system --add safe.directory /source
 
-# Compile and install CMake
-ENV CMAKE_URL="https://github.com/Kitware/CMake/releases/download/v${CMAKE_VERSION}/cmake-${CMAKE_VERSION}"
-RUN mkdir -p /tmp/cmake; \
-    cd /tmp/cmake; \
-    curl -kL ${CMAKE_URL}.tar.gz | tar zxf - -C . --strip-components 1; \
-    sed -i -e 's/|aarch64//g' Source/Checks/cm_cxx_features.cmake; \
-    ./bootstrap --prefix=/usr --parallel=`nproc`; \
-    make -j `nproc`; \
-    make install; \
-    cd && rm -rf /tmp/cmake
+# Install CMake
+RUN --mount=type=bind,from=cmake-bin,source=/cmake,target=/mnt/cmake sh /mnt/cmake/cmake-*.sh --skip-license --prefix=/usr --exclude-subdir
 
 # Show cmake version
 RUN cmake --version
 
-# download qemu and set exec flag
-RUN curl -kL https://github.com/balena-io/qemu/releases/download/v7.0.0%2Bbalena1/qemu-7.0.0.balena1-arm.tar.gz | tar zxvf - -C . --strip-components 1 && mv qemu-arm-static /usr/bin/qemu-static
-
-# set qemu exec flag
-RUN chmod +x /usr/bin/qemu-static
-
-# set entrypoint
+# Copy qemu and set QEMU_EXECVE / ENTRYPOINT
+COPY --from=qemu-bin /qemu/qemu-static /usr/bin/qemu-static
+ENV QEMU_EXECVE=/usr/bin/qemu-static
 ENTRYPOINT [ "/usr/bin/qemu-static" ]
