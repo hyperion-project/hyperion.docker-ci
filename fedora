@@ -1,19 +1,18 @@
 ARG DIST="fedora"
-ARG SUITE="39"
-ARG QT_VERSION="6"
-ARG REPOSITORY="https://github.com/hyperion-project"
+ARG SUITE="42"
+ARG QT_VERSION=6
+ARG REPOSITORY="hyperion-project"
+ARG QEMU_VERSION="11.1.1"
 ARG CMAKE_VERSION="3.28.3"
+
+FROM ghcr.io/${REPOSITORY}/qemu:${QEMU_VERSION} AS qemu-bin
+FROM ghcr.io/${REPOSITORY}/cmake:${CMAKE_VERSION} AS cmake-bin
 
 FROM ${DIST}:${SUITE}
 
-ARG DIST
-ARG SUITE
 ARG QT_VERSION
-ARG REPOSITORY
-ARG CMAKE_VERSION
 ARG TARGETPLATFORM
 
-ENV QEMU_EXECVE=1
 ENV TARGETPLATFORM=${TARGETPLATFORM:-linux/amd64}
 
 # update
@@ -61,35 +60,16 @@ RUN dnf -y group install 'development-tools' 'c-development' 'rpm-development-to
 # Mark /source as safe directory for git (used in CI mounts)
 RUN git config --system --add safe.directory /source
 
-# Install CMake on amd64 and arm64
-ENV CMAKE_URL="https://github.com/Kitware/CMake/releases/download/v${CMAKE_VERSION}/cmake-${CMAKE_VERSION}"
-RUN if [ "$TARGETPLATFORM" = "linux/amd64" ]; then \
-    curl -OLs ${CMAKE_URL}-linux-x86_64.sh; \
-    chmod +x cmake-${CMAKE_VERSION}-linux-x86_64.sh; \
-    ./cmake-${CMAKE_VERSION}-linux-x86_64.sh --skip-license --prefix="/usr"; \
-    rm -rf cmake-${CMAKE_VERSION}-linux-x86_64.sh; \
-elif [ "$TARGETPLATFORM" = "linux/arm64" ]; then \
-    curl -OLs ${CMAKE_URL}-linux-aarch64.sh; \
-    chmod +x cmake-${CMAKE_VERSION}-linux-aarch64.sh; \
-    ./cmake-${CMAKE_VERSION}-linux-aarch64.sh --skip-license --prefix="/usr"; \
-    rm -rf cmake-${CMAKE_VERSION}-linux-aarch64.sh; \
-fi
+# Install CMake
+RUN --mount=type=bind,from=cmake-bin,source=/cmake,target=/mnt/cmake sh /mnt/cmake/cmake-*.sh --skip-license --prefix=/usr --exclude-subdir
 
 # Show cmake version
-RUN cmake --version 
+RUN cmake --version
 
 # rpmdev-setuptree will create the ~/rpmbuild directory and a set of subdirectories (e.g. SPECS and BUILD)
 RUN rpmdev-setuptree
 
-# download qemu and set exec flag
-RUN if [ "$TARGETPLATFORM" = "linux/arm64" ]; then \
-    curl -kL https://github.com/balena-io/qemu/releases/download/v7.0.0%2Bbalena1/qemu-7.0.0.balena1-aarch64.tar.gz | tar zxvf - -C . --strip-components 1 && mv qemu-aarch64-static /usr/bin/qemu-static; \
-else \
-    printf '#!/bin/bash\nexec "$@"' > /usr/bin/qemu-static; \
-fi
-
-# set qemu exec flag
-RUN chmod +x /usr/bin/qemu-static
-
-# set entrypoint
+# Copy qemu and set QEMU_EXECVE / ENTRYPOINT
+COPY --from=qemu-bin /qemu/qemu-static /usr/bin/qemu-static
+ENV QEMU_EXECVE=/usr/bin/qemu-static
 ENTRYPOINT [ "/usr/bin/qemu-static" ]
